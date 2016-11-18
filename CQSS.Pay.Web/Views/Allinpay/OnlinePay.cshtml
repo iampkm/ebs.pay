@@ -1,0 +1,21 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    ViewBag.Title = "通联安全支付";
+    string errorMsg = ViewBag.ErrorMsg as string;
+    string formHtml = ViewBag.Form as string;
+}
+@if (string.IsNullOrWhiteSpace(formHtml))
+{
+    if (string.IsNullOrWhiteSpace(errorMsg))
+    {
+        errorMsg = "系统错误";
+    }
+    <div>@errorMsg</div>
+    <br />
+    <div>如有疑问，请联系客服</div>
+}
+else
+{
+    <div>正在向通联支付跳转，请稍后...</div>
+    @Html.Raw(formHtml);
+}

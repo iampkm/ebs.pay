@@ -1,0 +1,78 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    ViewBag.Title = "支付测试";
+    string orderId = "paytest" + DateTime.Now.ToString("yyyyMMddHHmmss");
+    string paymentAmt = "0.01";
+}
+<style type="text/css">
+    a {
+        text-decoration: none;
+    }
+</style>
+<script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+    function wechatbarcodepay() {
+        var wechatbarcodepayUrl = "/test/wechatbarcodepay?orderId=@(orderId)&paymentAmt=@(paymentAmt)&barcode=";
+        var barcode = $("#barcode").val();
+        if ($.trim(barcode).length == 0)
+            alert("请输入条形码");
+        else
+            window.open(wechatbarcodepayUrl + barcode);
+    }
+
+    function wechatrefund() {
+        var signkey = $("#signkey").val();
+        var orderid = $("#orderid").val();
+        if ($.trim(signkey).length == 0)
+            alert("请输入SignKey");
+        else if ($.trim(orderid).length == 0)
+            alert("请输入订单号");
+        else
+            window.open("/test/wechatpayrefund?signKey=" + signkey + "&orderId=" + orderid);
+    }
+
+    function allinpayrefund() {
+        var signkey = $("#signkey").val();
+        var orderid = $("#orderid").val();
+        if ($.trim(signkey).length == 0)
+            alert("请输入SignKey");
+        else if ($.trim(orderid).length == 0)
+            alert("请输入订单号");
+        else
+            window.open("/test/allinpayrefund?signKey=" + signkey + "&orderId=" + orderid);
+    }
+</script>
+订单编号：@orderId
+<br />
+<br />
+<a href="/test/alipay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">支付宝 支付测试</a>
+<br />
+<br />
+<a href="/test/wechatpay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">微信支付 支付测试</a>
+<br />
+<br />
+<a href="/test/Allinpay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">通联支付（跨境） 支付测试</a>
+<br />
+<br />
+<a href="/test/AllinpayNormal?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">通联支付（普通） 支付测试</a>
+<br />
+<br />
+<br />
+条形码：<input type="text" id="barcode" autocomplete="off" />
+<br />
+<br />
+<a href="javascript:;" onclick="wechatbarcodepay()">微信条码支付 支付测试</a>
+<br />
+<br />
+<hr />
+<br />
+SignKey ：<input type="text" id="signkey" />
+<br />
+<br />
+订单编号：<input type="text" id="orderid" autocomplete="off" />
+<br />
+<br />
+<a href="javascript:;" onclick="wechatrefund()">微信支付 退款测试</a>
+<br />
+<br />
+<a href="javascript:;" onclick="allinpayrefund()">通联支付 退款测试</a>

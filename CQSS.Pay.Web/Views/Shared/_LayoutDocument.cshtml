@@ -1,0 +1,29 @@
+﻿@{
+    string PageTitle = ViewBag.Title as string;
+    if (string.IsNullOrEmpty(PageTitle)) { PageTitle = "接口文档"; }
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>文档 - @PageTitle</title>
+    <link type="text/css" rel="stylesheet" href="~/Content/base/Site.css" />
+    <script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+</head>
+<body>
+    <div id="body">
+        <section class="featured">
+            <div class="content-wrapper">
+                <hgroup class="title">
+                    <h1>@PageTitle</h1>
+                </hgroup>
+            </div>
+        </section>
+        <section class="content-wrapper main-content clear-fix">
+            @RenderBody()
+        </section>
+    </div>
+    @Html.Partial("_AlertMsg")
+</body>
+</html>

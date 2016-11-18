@@ -1,0 +1,186 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutDocument.cshtml";
+    ViewBag.Title = "签名算法说明";
+}
+
+<h1>签名生成算法</h1><hr />
+<section class="contact">
+    <p>签名生成的通用步骤如下： </p>
+    <p>第一步，设所有发送或者接收到的业务数据为集合M，将集合M内的参数按照参数名ASCII码从小到大排序（字典序），使用URL键值对的格式（即key1=value1&amp;key2=value2…keyn=valuen&amp;）拼接成字符串stringA。 </p>
+    <p>特别注意以下重要规则： </p>
+    <ol>
+        <li>◆ 参数名ASCII码从小到大排序（字典序）； </li>
+        <li>◆ 参数名区分大小写； </li>
+        <li>◆ 当参数的值为json格式的字符串时，该字符串必须是缩进的、无空格和换行符的json格式； </li>
+        <li>◆ 验证调用返回签名时，传送的sign参数不参与签名，将生成的签名与该sign值作校验； </li>
+        <li>◆ 支付接口可能增加字段，验证签名时必须支持增加的扩展字段； </li>
+    </ol>
+    <p>第二步，在stringA最后拼接上signKey得到stringB字符串，并对stringB进行MD5运算，再将得到的32位字符串所有字符转换为大写，得到参数sign的值。</p>
+    <p style="color:red;">
+        <span class="label">备注：</span>
+        <span>请联系本站开发人员以获取signKey的值。</span>
+    </p>
+    <br />
+    <p>举例： </p>
+    <p>假设传送的业务参数如下： </p>
+    <div class="guide-msg">
+        <p>orderId：16063000000ZXHM </p>
+        <p>paymentAmt：1.01 </p>
+        <p>notifyUrl：http://www.sjgo365.com/pay/notify?type=1 </p>
+        <p>returnUrl：http://www.sjgo365.com/pay/payresult?type=1 </p>
+        <p>crossboardType：null </p>
+        <p>systemId：1 </p>
+    </div>
+    <p>第一步：对参数按照key=value的格式，并按照参数名ASCII字典序排序如下： </p>
+    <div class="guide-msg">
+        <p>stringA = "crossboardType=&amp;notifyUrl=http://www.sjgo365.com/pay/notify?type=1&amp;orderId=16063000000ZXHM&amp;paymentAmt=1.01&amp;returnUrl=http://www.sjgo365.com/pay/payresult?type=1&amp;systemId=1&amp;"; </p>
+    </div>
+    <p>第二步：拼接API密钥：（假设 signKey = "C4DDF940-0E1D-4CAC-AD38-883B930D5170"） </p>
+    <div class="guide-msg">
+        <p>stringB = stringA + signKey = "crossboardType=&amp;notifyUrl=http://www.sjgo365.com/pay/notify?type=1&amp;orderId=16063000000ZXHM&amp;paymentAmt=1.01&amp;returnUrl=http://www.sjgo365.com/pay/payresult?type=1&amp;systemId=1&amp;C4DDF940-0E1D-4CAC-AD38-883B930D5170"; </p>
+        <p>sign = MD5(stringB).toUpperCase() = "04E3AC02663F0DAF0BA467BC758F06B5" </p>
+    </div>
+    <br />
+    <p>示例代码（C#）： </p>
+    <div class="guide-msg">
+        <p>/// &lt;summary&gt;</p>
+        <p>/// 生成签名</p>
+        <p>/// &lt;/summary&gt;</p>
+        <p>/// &lt;param name=&quot;data&quot;&gt;生成签名的数据(json字符串)&lt;/param&gt;</p>
+        <p>/// &lt;param name=&quot;signKey&quot;&gt;签名加密密钥&lt;/param&gt;</p>
+        <p>/// &lt;returns&gt;&lt;/returns&gt;</p>
+        <p>public static string SignEncrypt(string data, string signKey)</p>
+        <p>{</p>
+        <p class="ml35">var json = Newtonsoft.Json.Linq.JObject.Parse(data);</p>
+        <br />
+        <p class="ml35">//遍历json的节点，并获取节点的值，并根据属性名称排升序</p>
+        <p class="ml35">var dict = new SortedDictionary&lt;string, string&gt;();</p>
+        <p class="ml35">var properties = json.Properties().ToList();</p>
+        <p class="ml35">foreach (var item in properties)</p>
+        <p class="ml35">{</p>
+        <p class="ml70">var node = json[item.Name];</p>
+        <p class="ml70">if (node.HasValues)</p>
+        <p class="ml105">dict[item.Name] = Newtonsoft.Json.JsonConvert.SerializeObject(node);</p>
+        <p class="ml70">else</p>
+        <p class="ml105">dict[item.Name] = node.ToString();</p>
+        <p class="ml35">}</p>
+        <br />
+        <p class="ml35">//拼接被加密的字符串</p>
+        <p class="ml35">string signString = string.Empty;</p>
+        <p class="ml35">foreach (var item in dict)</p>
+        <p class="ml35">{</p>
+        <p class="ml70">signString += string.Format(&quot;{0}={1}&amp;&quot;, item.Key, item.Value);</p>
+        <p class="ml35">}</p>
+        <p class="ml35">signString += signKey;</p>
+        <br />
+        <p class="ml35">//对数据进行MD5加密</p>
+        <p class="ml35">string sign = MD5Encrypt(signString);</p>
+        <p class="ml35">return sign;</p>
+        <p>}</p>
+        <br />
+        <p>/// &lt;summary&gt;</p>
+        <p>/// MD5加密</p>
+        <p>/// &lt;/summary&gt;</p>
+        <p>/// &lt;param name=&quot;strText&quot;&gt;被加密字符串&lt;/param&gt;</p>
+        <p>/// &lt;returns&gt;&lt;/returns&gt;</p>
+        <p>public static string MD5Encrypt(string strText)</p>
+        <p>{</p>
+        <p class="ml35">string code = string.Empty;</p>
+        <p class="ml35">var md5 = System.Security.Cryptography.MD5.Create();</p>
+        <p class="ml35">byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(strText));</p>
+        <p class="ml35">for (int i = 0; i &lt; s.Length; i++)</p>
+        <p class="ml35">{</p>
+        <p class="ml70">code += s[i].ToString(&quot;X2&quot;); //将得到的字符串转换成大写</p>
+        <p class="ml35">}</p>
+        <p class="ml35">return code;</p>
+        <p>}</p>
+    </div>
+</section>
+<br />
+<h1>校验签名方法</h1><hr />
+<section class="contact">
+    <header>
+        <h3>接口地址：</h3>
+    </header>
+    <p>
+        http://@(CQSS.Pay.Util.AppConfig.Domain)/sign/check
+    </p>
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>5651415CF8B7580A3C3D28A49E653C0D</td>
+            <td>数据签名，详见 <a href="#">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>{"orderId":"16063000000ZXHM","paymentAmt":"1.01","notifyUrl":"http://www.sjgo365.com/pay/notify?type=1","returnUrl":"http://www.sjgo365.com/pay/payresult?type=1","systemId":"1"}</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>返回值：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>status</td>
+            <td>执行结果</td>
+            <td>int</td>
+            <td>是</td>
+            <td>1</td>
+            <td>表示执行结果 取值范围：-1.异常 0.失败 1.成功</td>
+        </tr>
+        <tr>
+            <td>msg</td>
+            <td>结果描述</td>
+            <td>string</td>
+            <td>否</td>
+            <td>操作成功</td>
+            <td>当status参数的值不为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>校验结果</td>
+            <td>bool</td>
+            <td>否</td>
+            <td>true</td>
+            <td>表示校验结果 取值范围：true.签名合法 false.签名不合法 当status参数的值为1时，此参数必填</td>
+        </tr>
+    </table>
+    <p>
+        <span class="label">返回值类型：</span>
+        <span>json</span>
+    </p>
+    <p>
+        <span class="label">返回值示例：</span><br />
+        <span>{</span><br />
+        <span>"status":1,</span><br />
+        <span>"msg":"操作成功",</span><br />
+        <span>"data":true</span><br />
+        <span>}</span><br />
+    </p>
+</section>

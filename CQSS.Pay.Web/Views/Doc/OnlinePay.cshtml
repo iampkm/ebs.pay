@@ -1,0 +1,416 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutDocument.cshtml";
+    ViewBag.Title = "在线支付";
+}
+<h1>@ViewBag.Title</h1><hr />
+<section class="contact">
+    <header>
+        <h3>应用场景：</h3>
+    </header>
+    <p>
+        用户在网上商城购物生成订单后，去支付订单。
+    </p>
+    <header>
+        <h3>接口地址：</h3>
+    </header>
+    <p>
+        <span class="label">支付宝在线支付：</span>
+        <span>http://@(CQSS.Pay.Util.AppConfig.Domain)/alipay/onlinepay</span>
+    </p>
+    <p>
+        <span class="label">微信在线支付：</span>
+        <span>http://@(CQSS.Pay.Util.AppConfig.Domain)/wechatpay/onlinepay</span>
+    </p>
+    <p>
+        <span class="label">通联在线支付：</span>
+        <span>http://@(CQSS.Pay.Util.AppConfig.Domain)/allinpay/onlinepay</span>
+    </p>
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>F09652E34F3FE24DD14A4F1BF2F832D4</td>
+            <td>数据签名，详见 <a href="/Doc/SignDescription" target="_blank">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>{"orderId":"16063000000ZXHM","paymentAmt":"1.01","orderTime":"20160630150000","notifyUrl":"http://www.sjgo365.com/pay/notify?type=1","returnUrl":"http://www.sjgo365.com/pay/payresult?type=1","crossboardType":"1","goodsPrice":"0.97","taxPrice":"0.03","freightPrice":"0.01","buyerName":"张三","buyerCellphone":"13066669999","buyerIdCardNo":"50002319800101999X","systemId":"1"}</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>16063000000ZXHM</td>
+            <td>业务系统生成的订单编号</td>
+        </tr>
+        <tr>
+            <td>paymentAmt</td>
+            <td>支付金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1.01</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>orderTime</td>
+            <td>订单创建时间</td>
+            <td>string</td>
+            <td>是</td>
+            <td>20160630150000</td>
+            <td>日期格式：yyyyMMddHHmmss</td>
+        </tr>
+        <tr>
+            <td>notifyUrl</td>
+            <td>服务器异步通知支付成功的地址</td>
+            <td>string</td>
+            <td>是</td>
+            <td>http://www.sjgo365.com/pay/notify?type=1</td>
+            <td>接收支付成功的异步通知回调地址，通知url必须为直接可访问的url，支付结果以此通知地址收到的为准</td>
+        </tr>
+        <tr>
+            <td>returnUrl</td>
+            <td>支付完成返回支付结果的着陆页面</td>
+            <td>string</td>
+            <td>是</td>
+            <td>http://www.sjgo365.com/pay/payresult?type=1</td>
+            <td>支付宝处理完请求后，从支付企业跳转到显示支付结果的着陆页面</td>
+        </tr>
+        <tr>
+            <td>crossboardType</td>
+            <td>订单跨境类型</td>
+            <td>string</td>
+            <td>否</td>
+            <td>1</td>
+            <td>取值范围 1.跨境订单 0.普通订单</td>
+        </tr>
+        <tr>
+            <td>goodsPrice</td>
+            <td>订单货款总金额</td>
+            <td>string</td>
+            <td>否</td>
+            <td>0.97</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元。当crossboardType参数值为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>taxPrice</td>
+            <td>订单税费总金额</td>
+            <td>string</td>
+            <td>否</td>
+            <td>0.03</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元。当crossboardType参数值为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>freightPrice</td>
+            <td>订单运费总金额</td>
+            <td>string</td>
+            <td>否</td>
+            <td>0.01</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元。当crossboardType参数值为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>buyerName</td>
+            <td>购买人姓名</td>
+            <td>string</td>
+            <td>否</td>
+            <td>张三</td>
+            <td>购买人真实的姓名，必须与身份证号对应的姓名一致。当crossboardType参数值为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>buyerCellphone</td>
+            <td>购买人手机号码</td>
+            <td>string</td>
+            <td>否</td>
+            <td>13066669999</td>
+            <td>购买人用于收货的手机号码。当crossboardType参数值为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>buyerIdCardNo</td>
+            <td>购买人身份证号</td>
+            <td>string</td>
+            <td>否</td>
+            <td>50002319800101999X</td>
+            <td>此身份证号对应的姓名必须与购买人姓名一致。当crossboardType参数值为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>systemId</td>
+            <td>业务系统编号</td>
+            <td>string</td>
+            <td>否</td>
+            <td>1</td>
+            <td>用于确定调用业务系统的标识，正整数类型的字符串</td>
+        </tr>
+    </table>
+    <p style="color:red;">
+        <span class="label">备注：</span>
+        <span>当crossboardType参数值为1时，参数关系必须满足公式：paymentAmt = goodsPrice + taxPrice + freightPrice</span>
+    </p>
+    <header>
+        <h3>HTTP请求示例：</h3>
+    </header>
+    <p>
+        http://@(CQSS.Pay.Util.AppConfig.Domain)/alipay/onlinepay?sign=F09652E34F3FE24DD14A4F1BF2F832D4&data={"orderId":"16063000000ZXHM","paymentAmt":"1.01","orderTime":"20160630150000","notifyUrl":"http://www.sjgo365.com/pay/notify?type=1","returnUrl":"http://www.sjgo365.com/pay/payresult?type=1","crossboardType":"1","goodsPrice":"0.97","taxPrice":"0.03","freightPrice":"0.01","buyerName":"张三","buyerCellphone":"13066669999","buyerIdCardNo":"50002319800101999X","systemId":"1"}
+    </p>
+</section>
+<br />
+<h1>支付成功异步通知</h1><hr />
+<section class="contact">
+    <header>
+        <h3>应用场景：</h3>
+    </header>
+    <p>
+        当支付企业通知用户支付成功时，系统将会通知业务系统
+    </p>
+    <header>
+        <h3>通知地址：</h3>
+    </header>
+    <p>
+        业务系统发起的支付请求中的“notifyUrl”参数的值
+    </p>
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1C372C1B571D6289F6AAF30AD89ACB4A</td>
+            <td>数据签名，详见 <a href="/Doc/SignDescription" target="_blank">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>{"orderId":"16063000000ZXHM","tradeNo":"4005722001201606298074475088","paymentAmt":"1.01","result":"1"}</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>16063000000ZXHM</td>
+            <td>业务系统产生的订单编号</td>
+        </tr>
+        <tr>
+            <td>tradeNo</td>
+            <td>支付交易流水号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>4005722001201606298074475088</td>
+            <td>支付企业产生的支付交易流水号</td>
+        </tr>
+        <tr>
+            <td>paymentAmt</td>
+            <td>支付金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1.01</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>result</td>
+            <td>支付结果</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1</td>
+            <td>取值范围：-1.异常 0.未知 1.成功 2.失败</td>
+        </tr>
+    </table>
+    <header>
+        <h3>HTTP请求示例：</h3>
+    </header>
+    <p>
+        http://www.sjgo365.com/pay/notify?type=1&sign=1C372C1B571D6289F6AAF30AD89ACB4A&data={"orderId":"16063000000ZXHM","tradeNo":"4005722001201606298074475088","paymentAmt":"1.01","result":"1"}
+    </p>
+    <header>
+        <h3>返回值：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>status</td>
+            <td>执行结果</td>
+            <td>int</td>
+            <td>是</td>
+            <td>1</td>
+            <td>表示执行结果 取值范围：-1.异常 0.失败 1.成功</td>
+        </tr>
+        <tr>
+            <td>msg</td>
+            <td>结果描述</td>
+            <td>string</td>
+            <td>否</td>
+            <td>操作成功</td>
+            <td>当status参数的值不为1时，此参数必填</td>
+        </tr>
+    </table>
+    <p>
+        <span class="label">返回值类型：</span>
+        <span>json</span>
+    </p>
+    <p>
+        <span class="label">返回值示例：</span><br />
+        <span>{</span><br />
+        <span>"status":1,</span><br />
+        <span>"msg":"操作成功"</span><br />
+        <span>}</span><br />
+    </p>
+</section>
+<br />
+<h1>支付完成返回着陆页面</h1><hr />
+<section class="contact">
+    <header>
+        <h3>应用场景：</h3>
+    </header>
+    <p>
+        当用户在支付企业完成或取消支付时，返回的业务系统着陆页面，以提示用户支付结果
+    </p>
+    <header>
+        <h3>通知地址：</h3>
+    </header>
+    <p>
+        业务系统发起的支付请求中的“returnUrl”参数的值
+    </p>
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1C372C1B571D6289F6AAF30AD89ACB4A</td>
+            <td>数据签名，详见 <a href="/Doc/SignDescription" target="_blank">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>{"orderId":"16063000000ZXHM","tradeNo":"4005722001201606298074475088","paymentAmt":"1.01","result":"1"}</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>16063000000ZXHM</td>
+            <td>业务系统产生的订单编号</td>
+        </tr>
+        <tr>
+            <td>tradeNo</td>
+            <td>支付交易流水号</td>
+            <td>string</td>
+            <td>否</td>
+            <td>4005722001201606298074475088</td>
+            <td>支付企业产生的支付交易流水号，当result参数的值为1时，如果还未收到支付企业异步通知，此参数为空，否则此参数必填</td>
+        </tr>
+        <tr>
+            <td>paymentAmt</td>
+            <td>支付金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1.01</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>result</td>
+            <td>支付结果</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1</td>
+            <td>取值范围：-1.异常 0.未知 1.成功 2.失败</td>
+        </tr>
+    </table>
+    <header>
+        <h3>HTTP请求示例：</h3>
+    </header>
+    <p>
+        http://www.sjgo365.com/pay/payresult?type=1&sign=1C372C1B571D6289F6AAF30AD89ACB4A&data={"orderId":"16063000000ZXHM","tradeNo":"4005722001201606298074475088","paymentAmt":"1.01","result":"1"}
+    </p>
+</section>

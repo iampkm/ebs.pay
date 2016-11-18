@@ -1,0 +1,17 @@
+﻿@{
+    string PageTitle = ViewBag.Title as string;
+    if (string.IsNullOrEmpty(PageTitle)) { PageTitle = "支付"; }
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>世纪购 - @PageTitle</title>
+</head>
+<body>
+    <div>
+        @RenderBody()
+    </div>
+</body>
+</html>

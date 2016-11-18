@@ -1,0 +1,108 @@
+﻿<style type="text/css">
+.sjg_dialog_mask{background:#000;filter:alpha(opacity=50);-moz-opacity:0.5;-khtml-opacity:0.5;opacity:0.5;width:100%;height:100%;position:fixed;left:0px;top:0px;z-index:999;}
+.sjg_dialog_msg{font-family:"Microsoft YaHei";font-size:15px;position:fixed;left:50%;margin-left:-215px;top:50%;margin-top:-130px;background:#a0a0a0;border:1px solid #fff;-moz-border-radius:8px;-webkit-border-radius:8px;border-radius:8px;width:350px;padding:9px;z-index:1000;}
+.sjg_dialog_msg a{color:#000;text-decoration:none;}
+.sjg_dialog_msg a:hover, .sjg_dialog_msg a:active, .sjg_dialog_msg a:focus{color: #e60000; text-decoration: none;}
+.sjg_dialog_msg .sjg_msg_main{ background:#fff;-moz-border-radius:2px;-webkit-border-radius:2px;border-radius:2px;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_title{height:38px;line-height:38px;background:#faf7f8;border-bottom:1px solid #ececec;padding:0px 20px;font-size:14px;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_title_left{float:left;color:#383838;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_title_left img{vertical-align:middle;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_title_left span{margin-left:5px;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_title_right{ float:right;padding-top:13px;line-height:10px;font-size:25px;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_cotent{padding:20px 15px;font-size:16px;word-break:break-all;line-height:25px;text-indent:2em;color:#5e5e5e;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_cotent img{display:inline-block;*display:inline;*zoom:1;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_button{padding-bottom:25px;text-align:center;margin-top:20px;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_button a{padding:5px 26px;color:#fff;background:#da322e;border:1px solid #da322e;transition-delay:0s;transition-duration:0.3s;transition-property:all;transition-timing-function:ease;margin:0 10px;}
+.sjg_dialog_msg .sjg_msg_main .sjg_msg_button a:hover{background:#fff;color:#da322e;}
+</style>
+<script type="text/javascript">
+    var regional = {
+        alertMsg: {
+            title: { error: "错误", info: "提示", warn: "警告", success: "成功", confirm: "确认提示" },
+            butMsg: { ok: "确定", yes: "是", no: "否", cancel: "取消" }
+        }
+    };
+    var alertMsg = {
+        _boxId: "#alertMsgBox",
+        _closeTimer: null,
+        _types: { error: "error", info: "info", warn: "warn", success: "success", confirm: "confirm" },
+        _getTitle: function (key) {
+            return regional.alertMsg.title[key];
+        },
+        _open: function (type, msg, buttons, close) {
+            $(this._boxId).remove();
+            var butsHtml = "";
+            if (buttons) {
+                for (var i = 0; i < buttons.length; i++) {
+                    butsHtml += '<a name="button" href="javascript:">#butMsg#</a>'.replace("#butMsg#", buttons[i].name);
+                }
+            }
+            var boxHtml = '<div id="' + this._boxId.replace('#', '') + '">';
+            boxHtml += '<div class="sjg_dialog_msg">';
+            boxHtml += '<div class="sjg_msg_main">';
+            boxHtml += '<div class="sjg_msg_title">';
+            boxHtml += '<div class="sjg_msg_title_left"><img src="/content/images/tip.png" style="display:inline;"><span>#title#</span></div>';
+            if (close) {
+                boxHtml += '<div class="sjg_msg_title_right"><a href="javascript:;" onclick="alertMsg.close();">×</a></div>';
+            }
+            boxHtml += '</div>';
+            boxHtml += '<div class="sjg_msg_cotent">#message#</div>';
+            boxHtml += '<div class="sjg_msg_button">#butFragment#</div>';
+            boxHtml += '</div></div>';
+            boxHtml += '<div class="sjg_dialog_mask"></div></div>';
+            boxHtml = boxHtml.replace("#title#", this._getTitle(type)).replace("#message#", msg).replace("#butFragment#", butsHtml);
+            $(boxHtml).appendTo("body");
+            var $this = this;
+            if (this._closeTimer) {
+                clearTimeout(this._closeTimer);
+                this._closeTimer = null;
+            }
+            if (this._types.success == type) {
+                this._closeTimer = setTimeout(function () {
+                    $this.close();
+                    if (buttons && buttons.length > 0 && buttons[0].call)
+                        buttons[0].call();
+                }, 5000);
+            }
+            var jButs = $(this._boxId).find("a[name=button]");
+            for (var i = 0; i < buttons.length; i++) {
+                jButs.eq(i).click(function () {
+                    $this.close();
+                    var index = $(this).index();
+                    if (buttons[index].call)
+                        buttons[index].call();
+                });
+            }
+        },
+        _alert: function (type, msg, options) {
+            var op = { okName: regional.alertMsg.butMsg.ok, okCall: null, close: true };
+            $.extend(op, options);
+            var buttons = [{ name: op.okName, call: op.okCall }];
+            this._open(type, msg, buttons, op.close);
+        },
+        close: function () {
+            $(this._boxId).remove();
+        },
+        error: function (msg, options) {
+            this._alert(this._types.error, msg, options);
+        },
+        info: function (msg, options) {
+            this._alert(this._types.info, msg, options);
+        },
+        warn: function (msg, options) {
+            this._alert(this._types.warn, msg, options);
+        },
+        success: function (msg, options) {
+            this._alert(this._types.success, msg, options);
+        },
+        correct: function (msg, options) {
+            this._alert(this._types.success, msg, options);
+        },
+        confirm: function (msg, options) {
+            var op = { okName: regional.alertMsg.butMsg.ok, okCall: null, cancelName: regional.alertMsg.butMsg.cancel, cancelCall: null, close: true };
+            $.extend(op, options);
+            var buttons = [{ name: op.okName, call: op.okCall }, { name: op.cancelName, call: op.cancelCall }];
+            this._open(this._types.confirm, msg, buttons, op.close);
+        }
+    };
+</script>

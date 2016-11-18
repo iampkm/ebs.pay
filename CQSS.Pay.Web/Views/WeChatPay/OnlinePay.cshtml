@@ -1,0 +1,74 @@
+﻿@using CQSS.Pay.Model;
+@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    ViewBag.Title = "微信安全支付";
+    string errorMsg = ViewBag.ErrorMsg as string;
+    string codeUrl = ViewBag.CodeUrl as string;
+    PayRequestInfo payRequest = ViewBag.PayRequest as PayRequestInfo;
+}
+@if (!string.IsNullOrWhiteSpace(errorMsg))
+{
+    <div>@errorMsg</div>
+    <br />
+    <div>如有疑问，请联系客服</div>
+}
+else
+{
+    <link type="text/css" rel="stylesheet" href="/content/wechatpay.css" />
+    <script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+    @Html.Partial("_AlertMsg")
+    <div class="main">
+        <div style="font-size:20px;">微信支付</div>
+        <div style="margin-top: 15px; font-size: 13px;">
+            <div class="qrcode">
+                <img src="/QRCode/Index?url=@HttpUtility.UrlEncode(codeUrl)">
+            </div>
+            <div style="margin:5px 0;">
+                <p>请使用微信扫描二维码完成支付</p>
+            </div>
+        </div>
+        <div class="main" style="margin: 10px 5px; text-align: left; font-size: 15px;">
+            <p>订单编号：<strong style="font-size: 16px;">@payRequest.OrderId</strong> </p>
+            <p>支付金额：<strong style="font-size: 18px; color: #ff0000;">@payRequest.PaymentAmt.ToString("￥########0.00")</strong></p>
+        </div>
+        <div class="main" style="margin: 10px 5px 5px 5px; font-size: 12px;">
+            <p style="color: #666;"><strong>*</strong>提示：如果您已完成支付，请点击<a href="javascript:;" class="link" onclick="WeChatPay.finish();">支付完成</a></p>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var WeChatPay = {
+            _loading: false,
+            _orderId: "@payRequest.OrderId",
+            finish: function () {
+                this.ajaxPost("/WeChatPay/CheckPay", { orderId: this._orderId },
+                    function (response) {
+                        if (response && response.status == 1 && response.url)
+                            location.href = response.url;
+                        else if (response && response.status == 0 && response.url)
+                            alertMsg.confirm("您尚未完成支付，确定放弃支付？", { okCall: function () { location.href = response.url; } });
+                        else if (response && response.msg)
+                            alertMsg.error(response.msg);
+                        else
+                            alertMsg.error("发送请求失败，请稍后重试！");
+                    });
+            },
+            ajaxPost: function (url, data, callback, type, async, timeout, overlookloading) {
+                var $this = this;
+                if (overlookloading || !$this._loading) {
+                    $.ajax({
+                        async: async || false,
+                        type: type || 'post',
+                        url: url,
+                        data: data,
+                        cache: false,
+                        timeout: timeout || 60000,
+                        beforeSend: function () { $this._loading = true; },
+                        complete: function () { $this._loading = false; },
+                        success: callback,
+                        error: callback
+                    });
+                }
+            }
+        }
+    </script>
+}

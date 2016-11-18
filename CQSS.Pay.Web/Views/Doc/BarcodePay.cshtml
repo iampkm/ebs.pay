@@ -1,0 +1,211 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutDocument.cshtml";
+    ViewBag.Title = "条码支付";
+}
+<section class="contact">
+    <header>
+        <h3>应用场景：</h3>
+    </header>
+    <p>
+        商户在后台生成销售订单后，扫描用户的手机支付宝或微信支付条形码完成支付。
+    </p>
+</section>
+<section class="contact">
+    <header>
+        <h3>接口地址：</h3>
+    </header>
+    <p>
+        <span class="label">支付宝条码支付：</span>
+        <span>暂不支持</span>
+    </p>
+    <p>
+        <span class="label">微信条码支付：</span>
+        <span>http://@(CQSS.Pay.Util.AppConfig.Domain)/wechatpay/barcodepay</span>
+    </p>
+</section>
+<section class="contact">
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>F53F07BFB6B62FB7B918D0D356AFAD21</td>
+            <td>数据签名，详见<a href="/Doc/SignDescription" target="_blank">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>{"orderId":"16063000000ZXHM","paymentAmt":"1.01","barcode":"130474863081250968","systemId":"1"}</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>16063000000ZXHM</td>
+            <td>业务系统生成的订单编号</td>
+        </tr>
+        <tr>
+            <td>paymentAmt</td>
+            <td>支付金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1.01</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>barcode</td>
+            <td>支付条码值</td>
+            <td>string</td>
+            <td>是</td>
+            <td>130474863081250968</td>
+            <td>用户支付宝或微信中的支付条形授权码值或者二维码信息</td>
+        </tr>
+        <tr>
+            <td>systemId</td>
+            <td>业务系统编号</td>
+            <td>string</td>
+            <td>否</td>
+            <td>1</td>
+            <td>用于确定调用业务系统的标识，正整数类型的字符串</td>
+        </tr>
+    </table>
+    <p style="color:red;">
+        <span class="label">备注：</span>
+        <span>当支付金额过大或用户已支付次数过多，需要用户输入支付密码，所以等待时间可能很长，请将http超时时间设置为300秒以上，否则可能无法收到支付结果</span>
+    </p>
+    <header>
+        <h3>HTTP请求示例：</h3>
+    </header>
+    <p>
+        http://@(CQSS.Pay.Util.AppConfig.Domain)/wechatpay/barcodepay?sign=F53F07BFB6B62FB7B918D0D356AFAD21&data={"orderId":"16063000000ZXHM","paymentAmt":"1.01","barcode":"130474863081250968","systemId":"1"}
+    </p>
+    <header>
+        <h3>返回值系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>status</td>
+            <td>执行结果</td>
+            <td>int</td>
+            <td>是</td>
+            <td>1</td>
+            <td>表示执行结果 取值范围：-1.异常 0.失败 1.成功</td>
+        </tr>
+        <tr>
+            <td>msg</td>
+            <td>结果描述</td>
+            <td>string</td>
+            <td>否</td>
+            <td>操作成功</td>
+            <td>当status参数的值不为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>支付结果</td>
+            <td>json</td>
+            <td>否</td>
+            <td>{"orderId":"16063000000ZXHM","tradeNo":"4005722001201606298074475088","paymentAmt":"1.01","result":"1"}</td>
+            <td>当status参数的值为1时，此参数必填</td>
+        </tr>
+    </table>
+    <header>
+        <h3>返回值业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>16063000000ZXHM</td>
+            <td>业务系统产生的订单编号</td>
+        </tr>
+        <tr>
+            <td>tradeNo</td>
+            <td>支付交易流水号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>4005722001201606298074475088</td>
+            <td>支付企业产生的支付交易流水号</td>
+        </tr>
+        <tr>
+            <td>paymentAmt</td>
+            <td>支付金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1.01</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>result</td>
+            <td>支付结果</td>
+            <td>string</td>
+            <td>是</td>
+            <td>1</td>
+            <td>取值范围：-1.异常 0.未知 1.成功 2.失败</td>
+        </tr>
+    </table>
+    <p>
+        <span class="label">返回值类型：</span>
+        <span>json</span>
+    </p>
+    <p>
+        <span class="label">返回值示例：</span><br />
+        <span>{</span><br />
+        <span>"status":1,</span><br />
+        <span>"msg":"操作成功",</span><br />
+        <span>"data":</span><br />
+        <span style="margin-left:20px;">{</span><br />
+        <span style="margin-left:20px;">"orderId":"16063000000ZXHM",</span><br />
+        <span style="margin-left:20px;">"tradeNo":"4005722001201606298074475088",</span><br />
+        <span style="margin-left:20px;">"paymentAmt":"1.01",</span><br />
+        <span style="margin-left:20px;">"result":"1"</span><br />
+        <span style="margin-left:20px;">}</span><br />
+        <span>}</span><br />
+    </p>
+</section>

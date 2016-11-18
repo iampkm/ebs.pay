@@ -1,0 +1,184 @@
+﻿@using CQSS.Pay.Model;
+@{
+    Layout = "~/Views/Shared/_LayoutDocument.cshtml";
+    ViewBag.Title = "支付结果记录";
+    var searchResult = Model as SearchResult;
+    if (searchResult == null) { searchResult = new SearchResult(); }
+    Pagger paggerData = searchResult.PaggerData;
+    List<PayResultInfo> searchData = searchResult.ResultData as List<PayResultInfo>;
+    int searchType = ViewBag.SearchType;
+    string tab1css = string.Empty, tab2css = string.Empty;
+    switch (searchType)
+    {
+        case 0: tab1css = "over"; break;
+        case 1: tab2css = "over"; break;
+    }
+}
+<link type="text/css" rel="stylesheet" href="/Content/base/jqpagination.css" />
+<section class="contact">
+    <div class="nav">
+        <span> 筛选：</span>
+        <a class="@tab1css" href="/ReissueNotify/Index">待通知</a>
+        <a class="@tab2css" href="/ReissueNotify/Index?type=1">全部</a>
+    </div>
+</section>
+<section class="contact" style="height:37px;">
+    <div class="gigantic pagination">
+        <a href="javascript:;" onclick="Pagger.GoFirst()" class="first">«</a>
+        <a href="javascript:;" onclick="Pagger.GoPrevious()" class="previous">‹</a>
+        <input type="text" id="pageInput1" onkeyup="this.value = this.value.replace(/\D/g, '')" maxlength="10">
+        <a href="javascript:;" onclick="Pagger.GoNext()" class="next">›</a>
+        <a href="javascript:;" onclick="Pagger.GoLast()" class="last">»</a>
+    </div>
+</section>
+<section class="contact">
+    <table class="table">
+        <tr>
+            <th style="width:200px;">订单编号</th>
+            <th style="width:100px;">支付金额</th>
+            <th style="width:200px;">交易流水号</th>
+            <th style="width:110px;">支付方式</th>
+            <th style="width:100px;">通知状态</th>
+            <th style="width:250px;">操作</th>
+        </tr>
+        @if (searchData != null && searchData.Count > 0)
+        {
+            foreach (var item in searchData)
+            {
+                <tr>
+                    <td>@item.OrderId</td>
+                    <td>@item.PaymentAmt.ToString("#########0.00")</td>
+                    <td>@item.TradeNo</td>
+                    <td>@(AppEnum.GetEnumDescription((AppEnum.PayType)item.PayType))</td>
+                    <td>@(item.NotifyStatus == (int)AppEnum.GlobalStatus.Valid ? "已通知" : "")</td>
+                    <td>
+                        @if (item.NotifyStatus != (int)AppEnum.GlobalStatus.Valid)
+                        {
+                            <a href="javascript:;" onclick="ReissueNotify.notify(@item.SysNo)">补发通知</a>
+                        }
+                        <a href="javascript:;" onclick="ReissueNotify.goReturnUrl(@item.SysNo)">返回支付结果页</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="6" align="center">暂无记录</td></tr>
+        }
+    </table>
+</section>
+<section class="contact" style="height:37px;">
+    <div class="gigantic pagination">
+        <a href="javascript:;" onclick="Pagger.GoFirst()" class="first">«</a>
+        <a href="javascript:;" onclick="Pagger.GoPrevious()" class="previous">‹</a>
+        <input type="text" id="pageInput2" onkeyup="this.value = this.value.replace(/\D/g, '')" maxlength="10">
+        <a href="javascript:;" onclick="Pagger.GoNext()" class="next">›</a>
+        <a href="javascript:;" onclick="Pagger.GoLast()" class="last">»</a>
+    </div>
+</section>
+<script type="text/javascript">
+    $(document).ready(function () {
+        Pagger.Init(location.pathname + "?type=@searchType", '@paggerData.PageIndex', '@paggerData.PageCount');
+        Pagger.BindInput($("#pageInput1"));
+        Pagger.BindInput($("#pageInput2"));
+    });
+
+    var ReissueNotify = {
+        _loading: false,
+        notify: function (resultSysNo) {
+            this.ajaxPost("/ReissueNotify/Notify", { resultSysNo: resultSysNo }, function (response) {
+                if (response && response.status == 1)
+                    alertMsg.success("通知成功", { okCall: function () { location.reload(); } });
+                else if (response && response.msg)
+                    alertMsg.info(response.msg);
+                else
+                    alertMsg.error("操作请求发送失败，请稍后重试");
+            });
+        },
+        goReturnUrl: function (resultSysNo) {
+            this.ajaxPost("/ReissueNotify/GetReturnUrl", { resultSysNo: resultSysNo }, function (response) {
+                if (response && response.status == 1 && response.href)
+                    window.open(response.href);
+                else if (response && response.msg)
+                    alertMsg.info(response.msg);
+                else
+                    alertMsg.error("操作请求发送失败，请稍后重试");
+            });
+        },
+        ajaxPost: function (url, data, callback, type, async, overlookloading) {
+            var $this = this;
+            if (overlookloading || !$this._loading) {
+                $.ajax({
+                    async: async || false,
+                    type: type || 'post',
+                    url: url,
+                    data: data,
+                    cache: false,
+                    beforeSend: function () { $this._loading = true; },
+                    complete: function () { $this._loading = false; },
+                    success: callback,
+                    error: callback
+                });
+            }
+        }
+    };
+
+    var Pagger = {
+        _baseUrl: "",
+        _pageIndex: 1,
+        _pageCount: 0,
+        Init: function (baseUrl, pageIndex, pageCount) {
+            if (baseUrl)
+                this._baseUrl = baseUrl;
+            if (pageIndex)
+                this._pageIndex = parseInt(pageIndex);
+            if (pageCount)
+                this._pageCount = parseInt(pageCount);
+        },
+        Search: function () {
+            if (this._baseUrl) {
+                this._baseUrl += "&pageIndex=" + this._pageIndex;
+                location.href = this._baseUrl;
+            }
+        },
+        JumpToPage: function (index) {
+            if (0 < index && index <= this._pageCount) {
+                if (this._pageIndex != index) {
+                    this._pageIndex = index;
+                    this.Search();
+                }
+            }
+        },
+        GoFirst: function () {
+            this.JumpToPage(1);
+        },
+        GoPrevious: function () {
+            this.JumpToPage(this._pageIndex - 1);
+        },
+        GoNext: function () {
+            this.JumpToPage(this._pageIndex + 1);
+        },
+        GoLast: function () {
+            this.JumpToPage(this._pageCount);
+        },
+        BindInput: function (obj) {
+            var $this = this;
+            $(obj).val("Page " + $this._pageIndex + " of " + $this._pageCount);
+
+            $(obj).focus(function () {
+                $(this).val($this._pageIndex);
+            });
+
+            $(obj).blur(function () {
+                var input = parseInt($(this).val());
+                if (input != $this._pageIndex && input < $this.__pageCount) {
+                    $this._pageIndex = Math.min(input, $this._pageCount);
+                    $this.Search();
+                }
+                else {
+                    $(this).val("Page " + $this._pageIndex + " of " + $this._pageCount);
+                }
+            });
+        }
+    };
+</script>

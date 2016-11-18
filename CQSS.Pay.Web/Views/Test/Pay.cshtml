@@ -1,0 +1,9 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    string url = ViewBag.Url as string;
+}
+<form action="@url" method="get">
+    sign： <input type="text" name="sign" value="@ViewBag.Sign" style="width:300px;" /><br />
+    data： <input type="text" name="data" value="@ViewBag.Data" style="width:1000px;" /><br />
+    <input type="submit" value="提交" />
+</form>

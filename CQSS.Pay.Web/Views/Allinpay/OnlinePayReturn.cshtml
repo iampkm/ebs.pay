@@ -1,0 +1,22 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    ViewBag.Title = "通联支付结果";
+    string errorMsg = ViewBag.ErrorMsg as string;
+    var payNotify = ViewBag.PayNotify as CQSS.Pay.Model.PayNotifyInfo;
+    if (payNotify == null) { payNotify = new CQSS.Pay.Model.PayNotifyInfo(); }
+}
+@if (!string.IsNullOrWhiteSpace(errorMsg))
+{
+    <div>@errorMsg</div>
+    <br />
+    <div>如有疑问，请联系客服</div>
+}
+else
+{
+    var result = "支付" + (payNotify.Result == ((int)CQSS.Pay.Model.ResultStatus.Success).ToString() ? "成功" : "失败");
+    <div>订单号：@payNotify.OrderId</div>
+    <div>交易流水号：@payNotify.TradeNo</div>
+    <div>支付金额：￥@payNotify.PaymentAmt</div>
+    <div>支付结果：@result</div>
+    <div>如有疑问，请联系客服</div>
+}
