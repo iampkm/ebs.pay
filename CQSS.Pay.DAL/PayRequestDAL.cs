@@ -22,7 +22,7 @@ namespace CQSS.Pay.DAL
 INSERT  INTO Pay_Request
         (OrderId,PaymentAmt,PayType,NotifyUrl,ReturnUrl,RequestData,ExecuteResult,ResultDesc,AppId,Status,CreateTime)
 VALUES  (@OrderId,@PaymentAmt,@PayType,@NotifyUrl,@ReturnUrl,@RequestData,@ExecuteResult,@ResultDesc,@AppId,@Status,@CreateTime);
-SELECT  SCOPE_IDENTITY();";
+SELECT  SCOPE_IDENTITY();"; //SELECT LAST_INSERT_ID()
             info.SysNo = DbHelper.QueryScalar<int>(sql, info);
             return info.SysNo;
         }
