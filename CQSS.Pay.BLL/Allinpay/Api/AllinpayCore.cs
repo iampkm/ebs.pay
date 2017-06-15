@@ -49,7 +49,7 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             requestOrder.setIssuerId(data.GetValue("issuerId"));
             requestOrder.setPan(data.GetValue("pan"));
             requestOrder.setTradeNature(data.GetValue("tradeNature"));
-            requestOrder.setKey(AppConfig.AllinpayKey);
+            requestOrder.setKey(AppConfig.Global.AllinpayKey);
             string sign = requestOrder.doSign();
             return sign;
         }
@@ -68,7 +68,7 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             StringUtil.appendSignPara(buf, "orderNo", data.GetValue("orderNo"));
             StringUtil.appendSignPara(buf, "refundAmount", data.GetValue("refundAmount"));
             StringUtil.appendSignPara(buf, "orderDatetime", data.GetValue("orderDatetime"));
-            StringUtil.appendLastSignPara(buf, "key", AppConfig.AllinpayKey);
+            StringUtil.appendLastSignPara(buf, "key", AppConfig.Global.AllinpayKey);
             string sign = SecurityUtil.MD5Encode(buf.ToString());
             return sign;
         }
@@ -98,9 +98,9 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             paymentResult.setPayResult(data.GetValue("payResult"));
             paymentResult.setErrorCode(data.GetValue("errorCode"));
             paymentResult.setReturnDatetime(data.GetValue("returnDatetime"));
-            paymentResult.setKey(AppConfig.AllinpayKey);
+            paymentResult.setKey(AppConfig.Global.AllinpayKey);
             paymentResult.setSignMsg(data.GetValue("signMsg"));
-            string certPath = Path.Combine(HttpContext.Current.Request.PhysicalApplicationPath, AppConfig.AllinpaySSLCertPath);
+            string certPath = Path.Combine(HttpContext.Current.Request.PhysicalApplicationPath, AppConfig.Global.AllinpaySSLCertPath);
             paymentResult.setCertPath(certPath);
             bool verifyResult = paymentResult.verify();
             return verifyResult;
@@ -125,7 +125,7 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             StringUtil.appendSignPara(buf, "refundResult", data.GetValue("refundResult"));
             StringUtil.appendSignPara(buf, "errorCode", data.GetValue("errorCode"));
             StringUtil.appendSignPara(buf, "returnDatetime", data.GetValue("returnDatetime"));
-            StringUtil.appendLastSignPara(buf, "key", AppConfig.AllinpayKey);
+            StringUtil.appendLastSignPara(buf, "key", AppConfig.Global.AllinpayKey);
             string sign = SecurityUtil.MD5Encode(buf.ToString());
             return data.GetValue("signMsg") == sign;
         }

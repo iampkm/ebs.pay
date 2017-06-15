@@ -3,7 +3,19 @@
     string url = ViewBag.Url as string;
 }
 <form action="@url" method="get">
-    sign： <input type="text" name="sign" value="@ViewBag.Sign" style="width:300px;" /><br />
-    data： <input type="text" name="data" value="@ViewBag.Data" style="width:1000px;" /><br />
+    <table>
+        <tr>
+            <td style="width: 40px; text-align: right;">appId：</td>
+            <td><input type="text" name="appId" value="@ViewBag.AppId" style="width:300px;" /></td>
+        </tr>
+        <tr>
+            <td style="width: 40px; text-align: right;">sign：</td>
+            <td><input type="text" name="sign" value="@ViewBag.Sign" style="width:300px;" /></td>
+        </tr>
+        <tr>
+            <td style="width: 40px; text-align: right;">data：</td>
+            <td><input type="text" name="data" value="@ViewBag.Data" style="width:1000px;" /></td>
+        </tr>
+    </table>
     <input type="submit" value="提交" />
 </form>

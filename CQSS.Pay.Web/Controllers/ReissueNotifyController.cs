@@ -1,6 +1,8 @@
-﻿using CQSS.Pay.BLL.Basic;
+﻿using CQSS.Pay.BLL;
+using CQSS.Pay.BLL.Basic;
 using CQSS.Pay.DAL;
 using CQSS.Pay.Model;
+using CQSS.Pay.Model.Api;
 using CQSS.Pay.Util.Extension;
 using CQSS.Pay.Util.Helper;
 using System;
@@ -44,36 +46,42 @@ namespace CQSS.Pay.Web.Controllers
         {
             try
             {
-                if (!Request.IsAjaxRequest())
-                    return Json(new { status = 0, msg = "非法请求" });
-
-                var payResult = PayResultDAL.GetPayResult(resultSysNo);
-                if (payResult == null || payResult.SysNo <= 0)
+                var resultInfo = PayResultDAL.GetPayResult(resultSysNo);
+                if (resultInfo == null || resultInfo.SysNo <= 0)
                     return Json(new { status = 0, msg = "支付结果记录不存在" });
 
-                if (payResult.ExecuteResult != (int)ResultStatus.Success)
+                if (resultInfo.ExecuteResult != (int)ResultStatus.Success)
                     return Json(new { status = 0, msg = "支付结果记录不是成功且有效的支付" });
 
-                if (payResult.RequestSysNo <= 0)
+                if (resultInfo.RequestSysNo <= 0)
                     return Json(new { status = 0, msg = "支付结果记录无对应的请求记录" });
 
-                var payRequest = PayRequestDAL.GetPayRequest(payResult.RequestSysNo);
-                if (payRequest == null || payRequest.SysNo <= 0)
+                var requestInfo = PayRequestDAL.GetPayRequest(resultInfo.RequestSysNo);
+                if (requestInfo == null || requestInfo.SysNo <= 0)
                     return Json(new { status = 0, msg = "支付结果记录对应的请求记录不存在" });
 
-                if (!payRequest.NotifyUrl.IsUrl())
+                if (!requestInfo.NotifyUrl.IsUrl())
                     return Json(new { status = 0, msg = "支付请求记录的通知地址无效" });
 
-                bool notifyResult = PayResultManager.NotifyBack(payResult, payRequest);
-                if (notifyResult)
+                var resultInterface = Builder.BuildAlipayResult();
+                var notifyResult = resultInterface.NotifyBack(resultInfo, requestInfo);
+                if (notifyResult.Status == ResultStatus.Success)
                     return Json(new { status = 1, msg = "通知成功" });
+
+                //如果已经通知多次，则将通知状态改成已作废
+                int notifyCount = PayResultDAL.GetNotifyBackCount(resultInfo.SysNo);
+                if (notifyCount >= 5 && resultInfo.NotifyStatus != (int)AppEnum.NotifyStatus.Canceled)
+                {
+                    resultInfo.NotifyStatus = (int)AppEnum.NotifyStatus.Canceled;
+                    PayResultDAL.Update(resultInfo);
+                }
+                return Json(new { status = 0, msg = "通知失败，原因：" + notifyResult.Message });
             }
             catch (Exception ex)
             {
                 LogWriter.WriteLog(ex.Message + "\r\n" + ex.StackTrace, _logDirName, ExceptionHelper.ExceptionLevel.Exception);
                 return Json(new { status = -1, msg = ex.Message, error = ex.StackTrace });
             }
-            return Json(new { status = 0, msg = "通知失败" });
         }
 
         /// <summary>
@@ -86,36 +94,31 @@ namespace CQSS.Pay.Web.Controllers
         {
             try
             {
-                if (!Request.IsAjaxRequest())
-                    return Json(new { status = 0, msg = "非法请求" });
-
-                var payResult = PayResultDAL.GetPayResult(resultSysNo);
-                if (payResult == null || payResult.SysNo <= 0)
+                var resultInfo = PayResultDAL.GetPayResult(resultSysNo);
+                if (resultInfo == null || resultInfo.SysNo <= 0)
                     return Json(new { status = 0, msg = "支付结果记录不存在" });
 
-                if (payResult.RequestSysNo <= 0)
+                if (resultInfo.RequestSysNo <= 0)
                     return Json(new { status = 0, msg = "支付结果记录无对应的请求记录" });
 
-                var payRequest = PayRequestDAL.GetPayRequest(payResult.RequestSysNo);
-                if (payRequest == null || payRequest.SysNo <= 0)
+                var requestInfo = PayRequestDAL.GetPayRequest(resultInfo.RequestSysNo);
+                if (requestInfo == null || requestInfo.SysNo <= 0)
                     return Json(new { status = 0, msg = "支付结果记录对应的请求记录不存在" });
 
-                if (!payRequest.ReturnUrl.IsUrl())
+                if (!requestInfo.ReturnUrl.IsUrl())
                     return Json(new { status = 0, msg = "支付请求记录的返回地址不是有效URL" });
 
-                var payNotify = new PayNotifyInfo()
+                var notifyInfo = new PayNotifyInfo()
                 {
-                    OrderId = payResult.OrderId,
-                    PaymentAmt = payResult.PaymentAmt.ToString(),
-                    TradeNo = payResult.TradeNo,
-                    Result = payResult.ExecuteResult.ToString(),
+                    OrderId = resultInfo.OrderId,
+                    PaymentAmt = resultInfo.PaymentAmt.ToString(),
+                    TradeNo = resultInfo.TradeNo,
+                    ExtTradeNo = resultInfo.ExtTradeNo,
+                    Result = resultInfo.ExecuteResult.ToString(),
                 };
-                string data = JsonHelper.Serialize(payNotify);
-                string sign = SignManager.CreateSign(data).Data;
-                string returnUrl = payRequest.ReturnUrl;
-                returnUrl += returnUrl.IndexOf("?") > 0 ? "&" : "?";
-                returnUrl += "sign=" + sign;
-                returnUrl += "&data=" + data;
+
+                var resultInterface = Builder.BuildAlipayResult();
+                string returnUrl = resultInterface.GetReturnUrl(requestInfo, notifyInfo);
                 return Json(new { status = 1, href = returnUrl });
             }
             catch (Exception ex)

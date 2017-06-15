@@ -45,10 +45,10 @@ namespace CQSS.Pay.Web.Controllers
         }
 
         /// <summary>
-        /// 支付退款
+        /// 同步申请退款
         /// </summary>
         /// <returns></returns>
-        public ActionResult PayRefund()
+        public ActionResult SyncRefund()
         {
             return View();
         }
@@ -76,6 +76,15 @@ namespace CQSS.Pay.Web.Controllers
         /// </summary>
         /// <returns></returns>
         public ActionResult Allinpay()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// 威富通支付接口列表
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult SwiftPass()
         {
             return View();
         }

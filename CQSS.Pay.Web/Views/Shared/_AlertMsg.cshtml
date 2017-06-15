@@ -29,7 +29,7 @@
         _getTitle: function (key) {
             return regional.alertMsg.title[key];
         },
-        _open: function (type, msg, buttons, close) {
+        _open: function (type, msg, buttons, close, title) {
             $(this._boxId).remove();
             var butsHtml = "";
             if (buttons) {
@@ -50,7 +50,7 @@
             boxHtml += '<div class="sjg_msg_button">#butFragment#</div>';
             boxHtml += '</div></div>';
             boxHtml += '<div class="sjg_dialog_mask"></div></div>';
-            boxHtml = boxHtml.replace("#title#", this._getTitle(type)).replace("#message#", msg).replace("#butFragment#", butsHtml);
+            boxHtml = boxHtml.replace("#title#", title).replace("#message#", msg).replace("#butFragment#", butsHtml);
             $(boxHtml).appendTo("body");
             var $this = this;
             if (this._closeTimer) {
@@ -75,10 +75,10 @@
             }
         },
         _alert: function (type, msg, options) {
-            var op = { okName: regional.alertMsg.butMsg.ok, okCall: null, close: true };
+            var op = { okName: regional.alertMsg.butMsg.ok, okCall: null, close: true, title: this._getTitle(type) };
             $.extend(op, options);
             var buttons = [{ name: op.okName, call: op.okCall }];
-            this._open(type, msg, buttons, op.close);
+            this._open(type, msg, buttons, op.close, op.title);
         },
         close: function () {
             $(this._boxId).remove();
@@ -99,10 +99,11 @@
             this._alert(this._types.success, msg, options);
         },
         confirm: function (msg, options) {
-            var op = { okName: regional.alertMsg.butMsg.ok, okCall: null, cancelName: regional.alertMsg.butMsg.cancel, cancelCall: null, close: true };
+            var type = this._types.confirm;
+            var op = { okName: regional.alertMsg.butMsg.ok, okCall: null, cancelName: regional.alertMsg.butMsg.cancel, cancelCall: null, close: true, title: this._getTitle(type) };
             $.extend(op, options);
             var buttons = [{ name: op.okName, call: op.okCall }, { name: op.cancelName, call: op.cancelCall }];
-            this._open(this._types.confirm, msg, buttons, op.close);
+            this._open(type, msg, buttons, op.close, op.title);
         }
     };
 </script>

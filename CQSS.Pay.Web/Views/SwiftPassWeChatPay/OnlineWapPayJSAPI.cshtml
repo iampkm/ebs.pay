@@ -1,0 +1,58 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    ViewBag.Title = "微信安全支付";
+    string errorMsg = ViewBag.ErrorMsg as string;
+    string jsApiParams = ViewBag.JsApiParams as string;
+    string orderId = ViewBag.OrderId as string;
+    string returnUrl = ViewBag.ReturnUrl as string;
+}
+@if (!string.IsNullOrWhiteSpace(errorMsg))
+{
+    <div>@errorMsg</div>
+    <br />
+    <div>如有疑问，请联系客服</div>
+}
+else
+{
+    <script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/scripts/sjg-ext.js"></script>
+    <script type="text/javascript">
+        var orderId = "@orderId";
+        var returnUrl = '@Html.Raw(returnUrl)';
+
+        //调用微信JS API 支付
+        function onBridgeReady() {
+            WeixinJSBridge.invoke(
+                'getBrandWCPayRequest',
+                @Html.Raw(jsApiParams),
+                function (res) {
+                    var resultType = "";
+                    try {
+                        resultType = res.err_msg.split(':')[1];
+                    }
+                    catch (e) { }
+                    $.ajaxSubmit("/SwiftPassWeChatPay/CheckPay", { orderId: orderId, resultType: resultType }, function (response) {
+                        if (response && response.url)
+                            location.href = response.url;
+                        else
+                            location.href = returnUrl;
+                    });
+                }
+            );
+        }
+
+        if (typeof WeixinJSBridge == "undefined") {
+            if (document.addEventListener) {
+                document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+            }
+            else if (document.attachEvent) {
+                document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+            }
+        }
+        else {
+            onBridgeReady();
+        }
+    </script>
+}
+

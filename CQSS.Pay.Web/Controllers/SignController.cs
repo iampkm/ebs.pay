@@ -16,14 +16,15 @@ namespace CQSS.Pay.Web.Controllers
         /// <summary>
         /// 校验签名是否正确
         /// </summary>
+        /// <param name="appId"></param>
         /// <param name="sign"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public JsonResult Check(string sign, string data)
+        public JsonResult Check(string appId, string sign, string data)
         {
             try
             {
-                var result = SignManager.CheckSign(sign, data);
+                var result = SignManager.CheckSign(appId, sign, data);
                 if (result.Status == ResultStatus.Success)
                     return Json(new { status = 1, data = result.Data });
                 else

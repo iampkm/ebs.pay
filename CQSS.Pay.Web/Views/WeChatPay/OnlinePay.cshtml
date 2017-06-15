@@ -1,10 +1,10 @@
-﻿@using CQSS.Pay.Model;
+﻿@using CQSS.Pay.Model.Data;
 @{
     Layout = "~/Views/Shared/_LayoutPay.cshtml";
     ViewBag.Title = "微信安全支付";
     string errorMsg = ViewBag.ErrorMsg as string;
     string codeUrl = ViewBag.CodeUrl as string;
-    PayRequestInfo payRequest = ViewBag.PayRequest as PayRequestInfo;
+    PayRequestInfo requestInfo = ViewBag.RequestInfo as PayRequestInfo;
 }
 @if (!string.IsNullOrWhiteSpace(errorMsg))
 {
@@ -15,7 +15,6 @@
 else
 {
     <link type="text/css" rel="stylesheet" href="/content/wechatpay.css" />
-    <script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
     @Html.Partial("_AlertMsg")
     <div class="main">
         <div style="font-size:20px;">微信支付</div>
@@ -28,46 +27,48 @@ else
             </div>
         </div>
         <div class="main" style="margin: 10px 5px; text-align: left; font-size: 15px;">
-            <p>订单编号：<strong style="font-size: 16px;">@payRequest.OrderId</strong> </p>
-            <p>支付金额：<strong style="font-size: 18px; color: #ff0000;">@payRequest.PaymentAmt.ToString("￥########0.00")</strong></p>
+            <p>订单编号：<strong style="font-size: 16px;">@requestInfo.OrderId</strong> </p>
+            <p>支付金额：<strong style="font-size: 18px; color: #ff0000;">@requestInfo.PaymentAmt.ToString("￥########0.00")</strong></p>
         </div>
         <div class="main" style="margin: 10px 5px 5px 5px; font-size: 12px;">
             <p style="color: #666;"><strong>*</strong>提示：如果您已完成支付，请点击<a href="javascript:;" class="link" onclick="WeChatPay.finish();">支付完成</a></p>
         </div>
     </div>
+    <script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/scripts/sjg-ext.js"></script>
     <script type="text/javascript">
-        var WeChatPay = {
-            _loading: false,
-            _orderId: "@payRequest.OrderId",
-            finish: function () {
-                this.ajaxPost("/WeChatPay/CheckPay", { orderId: this._orderId },
-                    function (response) {
-                        if (response && response.status == 1 && response.url)
-                            location.href = response.url;
-                        else if (response && response.status == 0 && response.url)
-                            alertMsg.confirm("您尚未完成支付，确定放弃支付？", { okCall: function () { location.href = response.url; } });
-                        else if (response && response.msg)
-                            alertMsg.error(response.msg);
-                        else
-                            alertMsg.error("发送请求失败，请稍后重试！");
-                    });
-            },
-            ajaxPost: function (url, data, callback, type, async, timeout, overlookloading) {
-                var $this = this;
-                if (overlookloading || !$this._loading) {
-                    $.ajax({
-                        async: async || false,
-                        type: type || 'post',
-                        url: url,
-                        data: data,
-                        cache: false,
-                        timeout: timeout || 60000,
-                        beforeSend: function () { $this._loading = true; },
-                        complete: function () { $this._loading = false; },
-                        success: callback,
-                        error: callback
-                    });
+        var timmer = null;
+        var checkCount = 0;
+        $(document).ready(function () {
+            timmer = setInterval(autoCheck, 5000);
+        });
+
+        function autoCheck() {
+            $.ajaxSubmit("/WeChatPay/CheckPay", { orderId: WeChatPay._orderId }, function (response) {
+                checkCount += 1;
+                if (response && response.status == 1 && response.url) {
+                    clearInterval(timmer);
+                    location.href = response.url;
                 }
+
+                if (checkCount >= 60)
+                    clearInterval(timmer);
+            });
+        }
+
+        var WeChatPay = {
+            _orderId: "@requestInfo.OrderId",
+            finish: function () {
+                $.ajaxSubmit("/WeChatPay/CheckPay", { orderId: this._orderId }, function (response) {
+                    if (response && response.status == 1 && response.url)
+                        location.href = response.url;
+                    else if (response && response.status == 0 && response.url)
+                        alertMsg.confirm("您尚未完成支付，确定放弃支付？", { okCall: function () { location.href = response.url; }, title: "提示" });
+                    else if (response && response.msg)
+                        alertMsg.error(response.msg);
+                    else
+                        alertMsg.error("发送请求失败，请稍后重试！");
+                });
             }
         }
     </script>

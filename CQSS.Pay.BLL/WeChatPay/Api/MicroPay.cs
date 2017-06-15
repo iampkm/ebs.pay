@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Web;
 using System.Threading;
+using CQSS.Pay.Util;
 
 namespace CQSS.Pay.BLL.WeChatPay.Api
 {
@@ -21,12 +22,13 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
 
             WxPayData data = new WxPayData();
             data.SetValue("auth_code", auth_code);//授权码
-            data.SetValue("body", "世纪购订单:" + out_trade_no);//商品描述
+            data.SetValue("body", string.Format("{0}订单:{1}", AppConfig.Global.WebSiteName, out_trade_no));//商品描述
             data.SetValue("total_fee", total_fee);//总金额
             data.SetValue("out_trade_no", out_trade_no);//商户订单号
+            WxPayData result = new WxPayData();
             try
             {
-                WxPayData result = WxPayApi.Micropay(data); //提交被扫支付，接收返回结果
+                result = WxPayApi.Micropay(data); //提交被扫支付，接收返回结果
 
                 //如果提交被扫支付接口调用失败，则抛异常
                 if (!result.IsSet("return_code") || result.GetValue("return_code").ToString() == "FAIL")
@@ -47,56 +49,47 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
                     WxPayLog.Debug("MicroPay", "Micropay business success, result : " + result.ToXml());
                     return result;
                 }
+            }
+            catch (Exception ex)
+            {
+                //如果不是HTTP请求超时，则抛出异常（背景：存在支付请求超时但微信已扣款的情况，需要查询支付记录才能确认是否已扣款）
+                if (!HttpService.IsHttpTimeout(ex))
+                    throw;
+            }
 
-                /******************************************************************
-                 * 剩下的都是接口调用成功，业务失败的情况
-                 * ****************************************************************/
-                //1）业务结果明确失败
-                if (result.GetValue("err_code").ToString() != "USERPAYING" &&
+            /******************************************************************
+             * 剩下的都是接口调用成功，业务失败的情况
+             * ****************************************************************/
+            //1）业务结果明确失败
+            if (result.IsSet("err_code") &&
+                result.GetValue("err_code").ToString() != "USERPAYING" &&
                 result.GetValue("err_code").ToString() != "SYSTEMERROR")
-                {
-                    WxPayLog.Error("MicroPay", "micropay API interface call success, business failure, result : " + result.ToXml());
-                    return result;
-                }
-
-                //2）不能确定是否失败，需查单
-                //用商户订单号去查单
-                out_trade_no = data.GetValue("out_trade_no").ToString();
-                bool success = false;
-                WxPayData queryResult = Query(out_trade_no, out success);
-                if (success)
-                {
-                    return queryResult;
-                }
-                else if (queryResult == null)
-                {
-                    //长时间未完成交易，则撤销订单
-                    WxPayLog.Error("MicroPay", "Micropay failure, Reverse order is processing...");
-                    if (!Cancel(out_trade_no))
-                    {
-                        WxPayLog.Error("MicroPay", "Reverse order failure");
-                        throw new WxPayException("Reverse order failure！");
-                    }
-                }
-
+            {
+                WxPayLog.Error("MicroPay", "micropay API interface call success, business failure, result : " + result.ToXml());
                 return result;
             }
-            catch (WxPayException wex)
-            {
-                //如果HTTP请求超时，则查询用户用户支付结果（背景：存在支付请求超时但微信已扣款的情况）
-                if (HttpService.IsHttpTimeout(wex))
-                {
-                    bool success = false;
-                    out_trade_no = data.GetValue("out_trade_no").ToString();
-                    WxPayData queryResult = Query(out_trade_no, out success);
-                    if (success)
-                    {
-                        return queryResult;
-                    }
-                }
 
-                throw;
+            //2）不能确定是否失败，需查单
+            //用商户订单号去查单
+            out_trade_no = data.GetValue("out_trade_no").ToString();
+            bool success = false;
+            WxPayData queryResult = Query(out_trade_no, out success);
+            if (success)
+            {
+                return queryResult;
             }
+            else if (queryResult == null)
+            {
+                //长时间未完成交易，则撤销订单
+                WxPayLog.Error("MicroPay", "Micropay failure, Reverse order is processing...");
+                if (!Cancel(out_trade_no))
+                {
+                    WxPayLog.Error("MicroPay", "Reverse order failure");
+                    throw new WxPayException("Reverse order failure！");
+                }
+            }
+
+            return result;
         }
 
 
@@ -184,10 +177,10 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
                 }
                 return result;
             }
-            catch (WxPayException wex)
+            catch (Exception ex)
             {
                 //如果非HTTP请求超时的异常，直接抛出；如果是，认为用户还在支付中
-                if (!HttpService.IsHttpTimeout(wex))
+                if (!HttpService.IsHttpTimeout(ex))
                     throw;
 
                 succCode = 2;

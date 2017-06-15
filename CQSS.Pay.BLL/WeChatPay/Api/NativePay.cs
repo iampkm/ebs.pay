@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CQSS.Pay.Util;
+using System;
 using System.Collections.Generic;
 using System.Web;
 
@@ -42,7 +43,7 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
             WxPayLog.Info(this.GetType().ToString(), "Native pay mode 2 url is producing...");
 
             WxPayData data = new WxPayData();
-            data.SetValue("body", "世纪购订单:" + out_trade_no);//商品描述
+            data.SetValue("body", string.Format("{0}订单:{1}", AppConfig.Global.WebSiteName, out_trade_no));//商品描述
             data.SetValue("attach", out_trade_no);//附加数据
             data.SetValue("out_trade_no", out_trade_no);//商户订单号
             data.SetValue("total_fee", total_fee);//总金额

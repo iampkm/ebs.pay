@@ -47,7 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppConfig.cs" />
+    <Compile Include="Extension\ObjectExtention.cs" />
     <Compile Include="Extension\StringExtension.cs" />
+    <Compile Include="Helper\CacheHelper.cs" />
+    <Compile Include="Helper\ConfigLoader.cs" />
     <Compile Include="Helper\CryptoHelper.cs" />
     <Compile Include="Helper\DbHelper.cs" />
     <Compile Include="Helper\HttpHelper.cs" />

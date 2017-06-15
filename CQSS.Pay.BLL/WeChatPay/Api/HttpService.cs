@@ -99,12 +99,12 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
                     WxPayLog.Error("HttpService", "StatusCode : " + ((HttpWebResponse)e.Response).StatusCode);
                     WxPayLog.Error("HttpService", "StatusDescription : " + ((HttpWebResponse)e.Response).StatusDescription);
                 }
-                throw new WxPayException(e.ToString());
+                throw;
             }
             catch (Exception e)
             {
                 WxPayLog.Error("HttpService", string.Format("{1}{0}url : {2}{0}xml : {3}{0}timeout : {4}", Environment.NewLine, e.ToString(), url, xml, timeout));
-                throw new WxPayException(e.ToString());
+                throw;
             }
             finally
             {
@@ -180,12 +180,12 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
                     WxPayLog.Error("HttpService", "StatusCode : " + ((HttpWebResponse)e.Response).StatusCode);
                     WxPayLog.Error("HttpService", "StatusDescription : " + ((HttpWebResponse)e.Response).StatusDescription);
                 }
-                throw new WxPayException(e.ToString());
+                throw;
             }
             catch (Exception e)
             {
                 WxPayLog.Error("HttpService", e.ToString());
-                throw new WxPayException(e.ToString());
+                throw;
             }
             finally
             {
@@ -207,9 +207,9 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        public static bool IsHttpTimeout(WxPayException e)
+        public static bool IsHttpTimeout(Exception e)
         {
-            if (Regex.IsMatch(e.Message, @"System.Net.WebException:\s*操作超时", RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(e.ToString(), @"System.Net.WebException:\s*操作超时", RegexOptions.IgnoreCase))
                 return true;
 
             return false;

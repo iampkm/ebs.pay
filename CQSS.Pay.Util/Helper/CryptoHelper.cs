@@ -13,9 +13,9 @@ namespace CQSS.Pay.Util.Helper
         /// 生成签名
         /// </summary>
         /// <param name="data">生成签名的数据(json字符串)</param>
-        /// <param name="signKey">签名加密密钥</param>
+        /// <param name="signSecret">签名加密密钥</param>
         /// <returns></returns>
-        public static string SignEncrypt(string data, string signKey)
+        public static string SignEncrypt(string data, string signSecret)
         {
             var json = Newtonsoft.Json.Linq.JObject.Parse(data);
 
@@ -31,13 +31,24 @@ namespace CQSS.Pay.Util.Helper
                     dict[item.Name] = node.ToString();
             }
 
+            return SignEncrypt(dict, signSecret);
+        }
+
+        /// <summary>
+        /// 生成签名
+        /// </summary>
+        /// <param name="dict">生成签名的数据</param>
+        /// <param name="signSecret">签名加密密钥</param>
+        /// <returns></returns>
+        public static string SignEncrypt(SortedDictionary<string, string> dict, string signSecret)
+        {
             //拼接被加密的字符串
             string signString = string.Empty;
             foreach (var item in dict)
             {
                 signString += string.Format("{0}={1}&", item.Key, item.Value);
             }
-            signString += signKey;
+            signString += signSecret;
 
             //对数据进行MD5加密
             string sign = MD5Encrypt(signString);

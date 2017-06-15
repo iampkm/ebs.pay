@@ -23,7 +23,7 @@ namespace CQSS.Pay.Model
             /// <summary>
             /// 支付宝支付
             /// </summary>
-            [Description("支付宝支付")]
+            [Description("支付宝")]
             Alipay = 1,
             /// <summary>
             /// 微信支付
@@ -40,6 +40,16 @@ namespace CQSS.Pay.Model
             /// </summary>
             [Description("通联POS支付")]
             AllinpayPOS = 4,
+            /// <summary>
+            /// 威富通支付宝支付
+            /// </summary>
+            [Description("威富通支付宝")]
+            SwiftPassAlipay = 5,
+            /// <summary>
+            /// 威富通微信支付
+            /// </summary>
+            [Description("威富通微信支付")]
+            SwiftPassWeChatPay = 6,
         }
 
         /// <summary>
@@ -55,6 +65,40 @@ namespace CQSS.Pay.Model
             /// 有效的
             /// </summary>
             Valid = 1,
+        }
+
+        /// <summary>
+        /// 浏览器类型
+        /// </summary>
+        public enum BrowserType
+        {
+            /// <summary>
+            /// 微信浏览器
+            /// </summary>
+            WeChat = 0,
+            /// <summary>
+            /// 其他浏览器
+            /// </summary>
+            Others = 1,
+        }
+
+        /// <summary>
+        /// 支付通知状态
+        /// </summary>
+        public enum NotifyStatus
+        {
+            /// <summary>
+            /// 已作废
+            /// </summary>
+            Canceled = -1,
+            /// <summary>
+            /// 初始
+            /// </summary>
+            Original = 0,
+            /// <summary>
+            /// 已完成
+            /// </summary>
+            Finished = 1,
         }
 
         /// <summary>

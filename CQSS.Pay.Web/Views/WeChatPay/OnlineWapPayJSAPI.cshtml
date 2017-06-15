@@ -15,22 +15,10 @@
 else
 {
     <script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/scripts/sjg-ext.js"></script>
     <script type="text/javascript">
         var orderId = "@orderId";
         var returnUrl = '@Html.Raw(returnUrl)';
-
-        function ajaxPost(url, data, callback, type, async, timeout) {
-            $.ajax({
-                async: async || false,
-                type: type || 'post',
-                url: url,
-                data: data,
-                cache: false,
-                timeout: timeout || 60000,
-                success: callback,
-                error: callback
-            });
-        }
 
         //调用微信JS API 支付
         function onBridgeReady() {
@@ -43,13 +31,12 @@ else
                         resultType = res.err_msg.split(':')[1];
                     }
                     catch (e) { }
-                    ajaxPost("/WeChatPay/CheckPay", { orderId: orderId, resultType: resultType },
-                        function (response) {
-                            if (response && response.url)
-                                location.href = response.url;
-                            else
-                                location.href = returnUrl;
-                        });
+                    $.ajaxSubmit("/WeChatPay/CheckPay", { orderId: orderId, resultType: resultType }, function (response) {
+                        if (response && response.url)
+                            location.href = response.url;
+                        else
+                            location.href = returnUrl;
+                    });
                 }
             );
         }

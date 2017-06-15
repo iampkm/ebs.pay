@@ -40,10 +40,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommonExecutor.cs" />
-    <Compile Include="PayRefundDAL.cs" />
+    <Compile Include="PayAppDAL.cs" />
     <Compile Include="PayRequestDAL.cs" />
     <Compile Include="PayResultDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RefundRequestDAL.cs" />
+    <Compile Include="RefundResultDAL.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CQSS.Pay.Model\CQSS.Pay.Model.csproj">

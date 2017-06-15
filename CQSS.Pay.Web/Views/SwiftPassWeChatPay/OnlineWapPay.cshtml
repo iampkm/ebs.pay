@@ -1,0 +1,11 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutPay.cshtml";
+    ViewBag.Title = "微信安全支付";
+    string errorMsg = ViewBag.ErrorMsg as string;
+}
+@if (!string.IsNullOrWhiteSpace(errorMsg))
+{
+    <div>@errorMsg</div>
+    <br />
+    <div>如有疑问，请联系客服</div>
+}

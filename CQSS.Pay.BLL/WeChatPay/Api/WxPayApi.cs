@@ -516,7 +516,7 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
             {
                 Report(data);
             }
-            catch (WxPayException ex)
+            catch (Exception ex)
             {
                 //不做任何处理
             }

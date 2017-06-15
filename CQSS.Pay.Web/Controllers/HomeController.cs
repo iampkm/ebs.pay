@@ -11,6 +11,7 @@ namespace CQSS.Pay.Web.Controllers
         public ActionResult Index()
         {
             return Redirect("http://www.sjgo365.com/");
+            //return Redirect("/doc");
             //return View();
         }
     }

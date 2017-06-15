@@ -1,4 +1,5 @@
 ﻿@using CQSS.Pay.Model;
+@using CQSS.Pay.Model.Data;
 @{
     Layout = "~/Views/Shared/_LayoutDocument.cshtml";
     ViewBag.Title = "支付结果记录";
@@ -24,22 +25,23 @@
 </section>
 <section class="contact" style="height:37px;">
     <div class="gigantic pagination">
-        <a href="javascript:;" onclick="Pagger.GoFirst()" class="first">«</a>
-        <a href="javascript:;" onclick="Pagger.GoPrevious()" class="previous">‹</a>
+        <a href="javascript:;" onclick="Pagger.goFirst()" class="first">«</a>
+        <a href="javascript:;" onclick="Pagger.goPrevious()" class="previous">‹</a>
         <input type="text" id="pageInput1" onkeyup="this.value = this.value.replace(/\D/g, '')" maxlength="10">
-        <a href="javascript:;" onclick="Pagger.GoNext()" class="next">›</a>
-        <a href="javascript:;" onclick="Pagger.GoLast()" class="last">»</a>
+        <a href="javascript:;" onclick="Pagger.goNext()" class="next">›</a>
+        <a href="javascript:;" onclick="Pagger.goLast()" class="last">»</a>
     </div>
 </section>
 <section class="contact">
     <table class="table">
         <tr>
-            <th style="width:200px;">订单编号</th>
-            <th style="width:100px;">支付金额</th>
-            <th style="width:200px;">交易流水号</th>
+            <th style="width:190px;">订单编号</th>
+            <th style="width:80px;">支付金额</th>
+            <th style="width:195px;">交易流水号</th>
             <th style="width:110px;">支付方式</th>
-            <th style="width:100px;">通知状态</th>
-            <th style="width:250px;">操作</th>
+            <th style="width:105px;">支付时间</th>
+            <th style="width:80px;">通知状态</th>
+            <th style="width:200px;">操作</th>
         </tr>
         @if (searchData != null && searchData.Count > 0)
         {
@@ -47,9 +49,10 @@
             {
                 <tr>
                     <td>@item.OrderId</td>
-                    <td>@item.PaymentAmt.ToString("#########0.00")</td>
+                    <td align="center">@item.PaymentAmt.ToString("#########0.00")</td>
                     <td>@item.TradeNo</td>
                     <td>@(AppEnum.GetEnumDescription((AppEnum.PayType)item.PayType))</td>
+                    <td align="center">@(item.CreateTime.ToString("yyyy-MM-dd HH:mm:ss"))</td>
                     <td>@(item.NotifyStatus == (int)AppEnum.GlobalStatus.Valid ? "已通知" : "")</td>
                     <td>
                         @if (item.NotifyStatus != (int)AppEnum.GlobalStatus.Valid)
@@ -63,30 +66,30 @@
         }
         else
         {
-            <tr><td colspan="6" align="center">暂无记录</td></tr>
+            <tr><td colspan="7" align="center">暂无记录</td></tr>
         }
     </table>
 </section>
 <section class="contact" style="height:37px;">
     <div class="gigantic pagination">
-        <a href="javascript:;" onclick="Pagger.GoFirst()" class="first">«</a>
-        <a href="javascript:;" onclick="Pagger.GoPrevious()" class="previous">‹</a>
+        <a href="javascript:;" onclick="Pagger.goFirst()" class="first">«</a>
+        <a href="javascript:;" onclick="Pagger.goPrevious()" class="previous">‹</a>
         <input type="text" id="pageInput2" onkeyup="this.value = this.value.replace(/\D/g, '')" maxlength="10">
-        <a href="javascript:;" onclick="Pagger.GoNext()" class="next">›</a>
-        <a href="javascript:;" onclick="Pagger.GoLast()" class="last">»</a>
+        <a href="javascript:;" onclick="Pagger.goNext()" class="next">›</a>
+        <a href="javascript:;" onclick="Pagger.goLast()" class="last">»</a>
     </div>
 </section>
 <script type="text/javascript">
     $(document).ready(function () {
-        Pagger.Init(location.pathname + "?type=@searchType", '@paggerData.PageIndex', '@paggerData.PageCount');
-        Pagger.BindInput($("#pageInput1"));
-        Pagger.BindInput($("#pageInput2"));
+        Pagger.init(location.pathname + "?type=@searchType", '@paggerData.PageIndex', '@paggerData.PageCount');
+        Pagger.bindInput($("#pageInput1"));
+        Pagger.bindInput($("#pageInput2"));
     });
 
     var ReissueNotify = {
         _loading: false,
         notify: function (resultSysNo) {
-            this.ajaxPost("/ReissueNotify/Notify", { resultSysNo: resultSysNo }, function (response) {
+            $.ajaxSubmit("/ReissueNotify/Notify", { resultSysNo: resultSysNo }, function (response) {
                 if (response && response.status == 1)
                     alertMsg.success("通知成功", { okCall: function () { location.reload(); } });
                 else if (response && response.msg)
@@ -96,7 +99,7 @@
             });
         },
         goReturnUrl: function (resultSysNo) {
-            this.ajaxPost("/ReissueNotify/GetReturnUrl", { resultSysNo: resultSysNo }, function (response) {
+            $.ajaxSubmit("/ReissueNotify/GetReturnUrl", { resultSysNo: resultSysNo }, function (response) {
                 if (response && response.status == 1 && response.href)
                     window.open(response.href);
                 else if (response && response.msg)
@@ -104,22 +107,6 @@
                 else
                     alertMsg.error("操作请求发送失败，请稍后重试");
             });
-        },
-        ajaxPost: function (url, data, callback, type, async, overlookloading) {
-            var $this = this;
-            if (overlookloading || !$this._loading) {
-                $.ajax({
-                    async: async || false,
-                    type: type || 'post',
-                    url: url,
-                    data: data,
-                    cache: false,
-                    beforeSend: function () { $this._loading = true; },
-                    complete: function () { $this._loading = false; },
-                    success: callback,
-                    error: callback
-                });
-            }
         }
     };
 
@@ -127,7 +114,7 @@
         _baseUrl: "",
         _pageIndex: 1,
         _pageCount: 0,
-        Init: function (baseUrl, pageIndex, pageCount) {
+        init: function (baseUrl, pageIndex, pageCount) {
             if (baseUrl)
                 this._baseUrl = baseUrl;
             if (pageIndex)
@@ -135,33 +122,33 @@
             if (pageCount)
                 this._pageCount = parseInt(pageCount);
         },
-        Search: function () {
+        search: function () {
             if (this._baseUrl) {
                 this._baseUrl += "&pageIndex=" + this._pageIndex;
                 location.href = this._baseUrl;
             }
         },
-        JumpToPage: function (index) {
+        jumpToPage: function (index) {
             if (0 < index && index <= this._pageCount) {
                 if (this._pageIndex != index) {
                     this._pageIndex = index;
-                    this.Search();
+                    this.search();
                 }
             }
         },
-        GoFirst: function () {
-            this.JumpToPage(1);
+        goFirst: function () {
+            this.jumpToPage(1);
         },
-        GoPrevious: function () {
-            this.JumpToPage(this._pageIndex - 1);
+        goPrevious: function () {
+            this.jumpToPage(this._pageIndex - 1);
         },
-        GoNext: function () {
-            this.JumpToPage(this._pageIndex + 1);
+        goNext: function () {
+            this.jumpToPage(this._pageIndex + 1);
         },
-        GoLast: function () {
-            this.JumpToPage(this._pageCount);
+        goLast: function () {
+            this.jumpToPage(this._pageCount);
         },
-        BindInput: function (obj) {
+        bindInput: function (obj) {
             var $this = this;
             $(obj).val("Page " + $this._pageIndex + " of " + $this._pageCount);
 
@@ -173,7 +160,7 @@
                 var input = parseInt($(this).val());
                 if (input != $this._pageIndex && input < $this.__pageCount) {
                     $this._pageIndex = Math.min(input, $this._pageCount);
-                    $this.Search();
+                    $this.search();
                 }
                 else {
                     $(this).val("Page " + $this._pageIndex + " of " + $this._pageCount);

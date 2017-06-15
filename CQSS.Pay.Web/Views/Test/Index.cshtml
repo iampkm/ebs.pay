@@ -21,25 +21,31 @@
     }
 
     function wechatrefund() {
-        var signkey = $("#signkey").val();
-        var orderid = $("#orderid").val();
-        if ($.trim(signkey).length == 0)
-            alert("请输入SignKey");
-        else if ($.trim(orderid).length == 0)
+        var appId = $("#appId").val()
+        var appSecret = $("#appSecret").val();
+        var orderId = $("#orderId").val();
+        if ($.trim(appId).length == 0)
+            alert("请输入appId");
+        else if ($.trim(appSecret).length == 0)
+            alert("请输入appSecret");
+        else if ($.trim(orderId).length == 0)
             alert("请输入订单号");
         else
-            window.open("/test/wechatpayrefund?signKey=" + signkey + "&orderId=" + orderid);
+            window.open("/test/wechatpayrefund?appId=" + appId + "&appSecret=" + appSecret + "&orderId=" + orderId);
     }
 
     function allinpayrefund() {
-        var signkey = $("#signkey").val();
-        var orderid = $("#orderid").val();
-        if ($.trim(signkey).length == 0)
-            alert("请输入SignKey");
-        else if ($.trim(orderid).length == 0)
+        var appId = $("#appId").val()
+        var appSecret = $("#appSecret").val();
+        var orderId = $("#orderId").val();
+        if ($.trim(appId).length == 0)
+            alert("请输入appId");
+        else if ($.trim(appSecret).length == 0)
+            alert("请输入appSecret");
+        else if ($.trim(orderId).length == 0)
             alert("请输入订单号");
         else
-            window.open("/test/allinpayrefund?signKey=" + signkey + "&orderId=" + orderid);
+            window.open("/test/allinpayrefund?appId=" + appId + "&appSecret=" + appSecret + "&orderId=" + orderId);
     }
 </script>
 订单编号：@orderId
@@ -51,14 +57,14 @@
 <a href="/test/wechatpay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">微信支付 支付测试</a>
 <br />
 <br />
-<a href="/test/Allinpay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">通联支付（跨境） 支付测试</a>
+<a href="/test/Allinpay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">通联支付 支付测试</a>
 <br />
 <br />
-<a href="/test/AllinpayNormal?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">通联支付（普通） 支付测试</a>
+<a href="/test/SwiftPassWeChatPay?orderId=@(orderId)&paymentAmt=@(paymentAmt)" target="_blank">威富通微信 支付测试</a>
 <br />
 <br />
 <br />
-条形码：<input type="text" id="barcode" autocomplete="off" />
+条形码：<input type="text" id="barcode" autocomplete="off" style="width:300px;" />
 <br />
 <br />
 <a href="javascript:;" onclick="wechatbarcodepay()">微信条码支付 支付测试</a>
@@ -66,10 +72,13 @@
 <br />
 <hr />
 <br />
-SignKey ：<input type="text" id="signkey" />
+appId ：<input type="text" id="appId" style="margin-left: 33px; width: 250px;" />
 <br />
 <br />
-订单编号：<input type="text" id="orderid" autocomplete="off" />
+appSecret ：<input type="text" id="appSecret" style="width: 250px;" />
+<br />
+<br />
+订单编号：<input type="text" id="orderId" autocomplete="off" style="margin-left: 18px; width: 250px;" />
 <br />
 <br />
 <a href="javascript:;" onclick="wechatrefund()">微信支付 退款测试</a>

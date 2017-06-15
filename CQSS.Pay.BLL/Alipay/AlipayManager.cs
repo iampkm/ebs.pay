@@ -1,5 +1,4 @@
-﻿using CQSS.Pay.BLL.Basic;
-using CQSS.Pay.Model;
+﻿using CQSS.Pay.Model.Api;
 using CQSS.Pay.Util;
 using CQSS.Pay.Util.Extension;
 using CQSS.Pay.Util.Helper;
@@ -34,13 +33,13 @@ namespace CQSS.Pay.BLL.Alipay
             //支付类型 只支持取值为1（商品购买） 不可空
             paramsDict.Add("payment_type", AlipayConfig.payment_type);
             //服务器异步通知页面路径 支付宝服务器主动通知商户网站里指定的页面http路径 可空
-            paramsDict.Add("notify_url", string.Format("http://{0}/Alipay/OnlinePayNotify", AppConfig.Domain));
+            paramsDict.Add("notify_url", string.Format("http://{0}/Alipay/OnlinePayNotify", AppConfig.Global.Domain));
             //页面跳转同步通知页面路径 支付宝处理完请求后，当前页面自动跳转到商户网站里指定页面的http路径 可空
-            paramsDict.Add("return_url", string.Format("http://{0}/Alipay/OnlinePayReturn", AppConfig.Domain));
+            paramsDict.Add("return_url", string.Format("http://{0}/Alipay/OnlinePayReturn", AppConfig.Global.Domain));
             //商户网站唯一订单号 不可空
             paramsDict.Add("out_trade_no", orderInfo.OrderId);
             //商品的标题/交易标题/订单标题/订单关键字等，最长为128个汉字 不可空
-            paramsDict.Add("subject", "世纪购订单:" + orderInfo.OrderId);
+            paramsDict.Add("subject", string.Format("{0}订单:{1}", AppConfig.Global.WebSiteName, orderInfo.OrderId));
             //交易金额 该笔订单的资金总额，单位为RMB-Yuan。取值范围为[0.01，100000000.00]，精确到小数点后两位 不可空
             paramsDict.Add("total_fee", Convert.ToDecimal(orderInfo.PaymentAmt).ToString("#########0.00"));
             //商品描述 对一笔交易的具体描述信息。如果是多种商品，请将商品描述字符串累加传给body 可空
@@ -74,13 +73,13 @@ namespace CQSS.Pay.BLL.Alipay
             //支付类型 只支持取值为1（商品购买） 不可空
             paramsDict.Add("payment_type", AlipayConfig.payment_type);
             //服务器异步通知页面路径 支付宝服务器主动通知商户网站里指定的页面http路径 可空
-            paramsDict.Add("notify_url", string.Format("http://{0}/Alipay/OnlinePayNotify", AppConfig.Domain));
+            paramsDict.Add("notify_url", string.Format("http://{0}/Alipay/OnlinePayNotify", AppConfig.Global.Domain));
             //页面跳转同步通知页面路径 支付宝处理完请求后，当前页面自动跳转到商户网站里指定页面的http路径 可空
-            paramsDict.Add("return_url", string.Format("http://{0}/Alipay/OnlinePayReturn", AppConfig.Domain));
+            paramsDict.Add("return_url", string.Format("http://{0}/Alipay/OnlinePayReturn", AppConfig.Global.Domain));
             //商户网站唯一订单号 不可空
             paramsDict.Add("out_trade_no", orderInfo.OrderId);
             //商品的标题/交易标题/订单标题/订单关键字等，最长为128个汉字 不可空
-            paramsDict.Add("subject", "世纪购订单:" + orderInfo.OrderId);
+            paramsDict.Add("subject", string.Format("{0}订单:{1}", AppConfig.Global.WebSiteName, orderInfo.OrderId));
             //交易金额 该笔订单的资金总额，单位为RMB-Yuan。取值范围为[0.01，100000000.00]，精确到小数点后两位 不可空
             paramsDict.Add("total_fee", Convert.ToDecimal(orderInfo.PaymentAmt).ToString("#########0.00"));
             //商品描述 对一笔交易的具体描述信息。如果是多种商品，请将商品描述字符串累加传给body 可空

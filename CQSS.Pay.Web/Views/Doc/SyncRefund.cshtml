@@ -1,0 +1,460 @@
+﻿@using CQSS.Pay.Util;
+@using CQSS.Pay.Util.Helper;
+@using CQSS.Pay.Model.Api;
+@{
+    Layout = "~/Views/Shared/_LayoutDocument.cshtml";
+    ViewBag.Title = "同步申请退款";
+
+    var wechatpayUrl = string.Format("http://{0}/wechatpay/syncrefund", AppConfig.Global.Domain);
+    var allinpayUrl = string.Format("http://{0}/allinpay/syncrefund", AppConfig.Global.Domain);
+    var appId = AppConfig.Global.DocumentAppId;
+    var appSecret = AppConfig.Global.DocumentAppSecret;
+    var setting = JsonHelper.GetDefaultSettings();
+    setting.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    var urlFormat = "{0}appId={1}&sign={2}&data={3}";
+
+    var orderInfo = new RefundOrderInfo()
+    {
+        OrderId = "16063000000ZXHM",
+        OrderTime = "20160630150000",
+        TradeNo = "4005722001201606298074475088",
+        PaymentAmt = "1.01",
+        RefundOrderId = "20160630111325235",
+        RefundAmt = "1.01",
+        NotifyUrl = "http://www.sjgo365.com/pay/refund?type=1",
+    };
+    var requestData = JsonHelper.Serialize(orderInfo, setting);
+    var requestSign = CryptoHelper.SignEncrypt(requestData, appSecret);
+    var requestUrl = string.Format("{0}?appId={1}&sign={2}&data={3}", wechatpayUrl, appId, requestSign, requestData);
+
+    var notifyInfo = new RefundNotifyInfo()
+    {
+        OrderId = orderInfo.OrderId,
+        TradeNo = orderInfo.TradeNo,
+        RefundOrderId = orderInfo.RefundOrderId,
+        RefundNo = "2005722001201606290299315618",
+        RefundAmt = orderInfo.RefundAmt,
+        Result = "1",
+    };
+    var notifyData = JsonHelper.Serialize(notifyInfo, setting);
+    var notifySign = CryptoHelper.SignEncrypt(notifyData, appSecret);
+    var notifyUrl = string.Format(urlFormat, orderInfo.NotifyUrl + (orderInfo.NotifyUrl.IndexOf("?") > 0 ? "&" : "?"), appId, notifySign, notifyData);
+}
+<h1>@ViewBag.Title</h1><hr />
+<section class="contact">
+    <header>
+        <h3>应用场景：</h3>
+    </header>
+    <p>
+        客户取消订单并申请退款时，业务系统向支付企业发起退款申请
+    </p>
+</section>
+<section class="contact">
+    <header>
+        <h3>接口地址：</h3>
+    </header>
+    <p>
+        <span class="label">微信支付退款：</span>
+        <span>@wechatpayUrl</span>
+    </p>
+    <p>
+        <span class="label">通联支付退款：</span>
+        <span>@allinpayUrl</span>
+    </p>
+</section>
+<section class="contact">
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>appId</td>
+            <td>业务系统ID</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@appId</td>
+            <td>业务系统ID，需要向本站管理人员申请</td>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@requestSign</td>
+            <td>数据签名，详见<a href="/Doc/SignDescription" target="_blank">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@requestData</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.OrderId</td>
+            <td>业务系统生成的订单编号</td>
+        </tr>
+        <tr>
+            <td>orderTime</td>
+            <td>订单创建时间</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.OrderTime</td>
+            <td>与支付请求的订单创建时间保持相同，日期格式：yyyyMMddHHmmss</td>
+        </tr>
+        <tr>
+            <td>tradeNo</td>
+            <td>支付交易流水号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.TradeNo</td>
+            <td>支付企业产生的支付交易流水号</td>
+        </tr>
+        <tr>
+            <td>paymentAmt</td>
+            <td>支付金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.PaymentAmt</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>refundOrderId</td>
+            <td>退款申请单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.RefundOrderId</td>
+            <td>业务系统生成的退款申请单编号</td>
+        </tr>
+        <tr>
+            <td>refundAmt</td>
+            <td>退款金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.RefundAmt</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>notifyUrl</td>
+            <td>服务器异步通知退款成功的地址</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@orderInfo.NotifyUrl</td>
+            <td>接收退款成功的异步通知回调地址，通知url必须为直接可访问的url，防止因http请求超时而丢失退款结果</td>
+        </tr>
+    </table>
+    <p style="color:red;">
+        <span class="label">备注：</span>
+        <span>当一笔退款申请失败后，如果重新提交退款申请，必须使用原来的退款申请单编号，总退款金额不能超过用户实际支付金额。</span>
+    </p>
+    <header>
+        <h3>HTTP请求示例：</h3>
+    </header>
+    <p>
+        @requestUrl
+    </p>
+    <header>
+        <h3>返回值系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>status</td>
+            <td>执行结果</td>
+            <td>int</td>
+            <td>是</td>
+            <td>1</td>
+            <td>表示执行结果 取值范围：-1.异常 0.失败 1.成功</td>
+        </tr>
+        <tr>
+            <td>msg</td>
+            <td>结果描述</td>
+            <td>string</td>
+            <td>否</td>
+            <td>操作成功</td>
+            <td>当status参数的值不为1时，此参数必填</td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>退款结果</td>
+            <td>json</td>
+            <td>否</td>
+            <td>@notifyData</td>
+            <td>当status参数的值为1时，此参数必填</td>
+        </tr>
+    </table>
+    <header>
+        <h3>返回值业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.OrderId</td>
+            <td>业务系统产生的订单编号</td>
+        </tr>
+        <tr>
+            <td>tradeNo</td>
+            <td>支付交易流水号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.TradeNo</td>
+            <td>支付企业产生的支付交易流水号</td>
+        </tr>
+        <tr>
+            <td>refundOrderId</td>
+            <td>退款申请单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.RefundOrderId</td>
+            <td>业务系统生成的退款申请单编号</td>
+        </tr>
+        <tr>
+            <td>refundNo</td>
+            <td>退款交易流水号</td>
+            <td>string</td>
+            <td>否</td>
+            <td>@notifyInfo.RefundNo</td>
+            <td>支付企业产生的退款交易流水号（通联支付不会返回退款交易流水号）</td>
+        </tr>
+        <tr>
+            <td>refundAmt</td>
+            <td>退款金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.RefundAmt</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>result</td>
+            <td>退款结果</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.Result</td>
+            <td>取值范围：-1.异常 0.未知 1.成功 2.失败</td>
+        </tr>
+    </table>
+    <p>
+        <span class="label">返回值类型：</span>
+        <span>json</span>
+    </p>
+    <p>
+        <span class="label">返回值示例：</span><br />
+        <span>{</span><br />
+        <span>"status":1,</span><br />
+        <span>"msg":"操作成功",</span><br />
+        <span>"data":</span><br />
+        <span style="margin-left:20px;">{</span><br />
+        <span style="margin-left:20px;">"orderId":"@notifyInfo.OrderId",</span><br />
+        <span style="margin-left:20px;">"tradeNo":"@notifyInfo.TradeNo",</span><br />
+        <span style="margin-left:20px;">"refundOrderId":"@notifyInfo.RefundOrderId",</span><br />
+        <span style="margin-left:20px;">"refundNo":"@notifyInfo.RefundNo",</span><br />
+        <span style="margin-left:20px;">"refundAmt":"@notifyInfo.RefundAmt"</span><br />
+        <span style="margin-left:20px;">"result":"@notifyInfo.Result"</span><br />
+        <span style="margin-left:20px;">}</span><br />
+        <span>}</span><br />
+    </p>
+</section>
+
+<h1>退款成功异步通知</h1><hr />
+<section class="contact">
+    <header>
+        <h3>应用场景：</h3>
+    </header>
+    <p>
+        当支付企业通知支付系统退款成功时，系统将会异步通知业务系统
+    </p>
+    <header>
+        <h3>通知地址：</h3>
+    </header>
+    <p>
+        业务系统发起的退款请求中的“notifyUrl”参数的值
+    </p>
+    <header>
+        <h3>系统参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>appId</td>
+            <td>业务系统ID</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@appId</td>
+            <td>业务系统ID，业务系统发起的退款请求中的“appId”参数的值</td>
+        </tr>
+        <tr>
+            <td>sign</td>
+            <td>数据签名</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifySign</td>
+            <td>数据签名，详见 <a href="/Doc/SignDescription" target="_blank">签名生成算法</a></td>
+        </tr>
+        <tr>
+            <td>data</td>
+            <td>业务数据</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyData</td>
+            <td>业务参数序列化成的json格式的字符串</td>
+        </tr>
+    </table>
+    <header>
+        <h3>业务参数：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>orderId</td>
+            <td>订单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.OrderId</td>
+            <td>业务系统产生的订单编号</td>
+        </tr>
+        <tr>
+            <td>tradeNo</td>
+            <td>支付交易流水号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.TradeNo</td>
+            <td>支付企业产生的支付交易流水号</td>
+        </tr>
+        <tr>
+            <td>refundOrderId</td>
+            <td>退款申请单编号</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.RefundOrderId</td>
+            <td>业务系统生成的退款申请单编号</td>
+        </tr>
+        <tr>
+            <td>refundNo</td>
+            <td>退款交易流水号</td>
+            <td>string</td>
+            <td>否</td>
+            <td>@notifyInfo.RefundNo</td>
+            <td>支付企业产生的退款交易流水号（通联支付不会返回退款交易流水号）</td>
+        </tr>
+        <tr>
+            <td>refundAmt</td>
+            <td>退款金额</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.RefundAmt</td>
+            <td>正实数类型的字符串，最多保留2位小数，单位：元</td>
+        </tr>
+        <tr>
+            <td>result</td>
+            <td>退款结果</td>
+            <td>string</td>
+            <td>是</td>
+            <td>@notifyInfo.Result</td>
+            <td>取值范围：-1.异常 0.未知 1.成功 2.失败</td>
+        </tr>
+    </table>
+    <header>
+        <h3>HTTP请求示例：</h3>
+    </header>
+    <p>
+        @notifyUrl
+    </p>
+    <header>
+        <h3>返回值：</h3>
+    </header>
+    <table class="table">
+        <tr>
+            <th style="width:120px;">参数</th>
+            <th style="width:150px;">名称</th>
+            <th style="width:70px;">类型</th>
+            <th style="width:50px;">必填</th>
+            <th style="width:220px;">示例值</th>
+            <th style="width:350px;">描述</th>
+        </tr>
+        <tr>
+            <td>status</td>
+            <td>执行结果</td>
+            <td>int</td>
+            <td>是</td>
+            <td>1</td>
+            <td>表示执行结果 取值范围：-1.异常 0.失败 1.成功</td>
+        </tr>
+        <tr>
+            <td>msg</td>
+            <td>结果描述</td>
+            <td>string</td>
+            <td>否</td>
+            <td>操作成功</td>
+            <td>当status参数的值不为1时，此参数必填</td>
+        </tr>
+    </table>
+    <p>
+        <span class="label">返回值类型：</span>
+        <span>json</span>
+    </p>
+    <p>
+        <span class="label">返回值示例：</span><br />
+        <span>{</span><br />
+        <span>"status":1,</span><br />
+        <span>"msg":"操作成功"</span><br />
+        <span>}</span><br />
+    </p>
+</section>

@@ -99,6 +99,9 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             this._value["signMsg"] = "";
         }
 
+        /// <summary>
+        /// 设置支付结果参数
+        /// </summary>
         private void SetPayResultParams()
         {
             //商户号 与提交订单时的商户号保持一致 不可空
@@ -193,22 +196,6 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             this._value["signMsg"] = "";
         }
 
-        public void SetCustomsExt(string eshopEntCode, string eshopEntName, int goodsPrice, int taxPrice)
-        {
-            var str = new StringBuilder();
-            str.Append("<GW_CUSTOMS>");
-            str.AppendFormat("<CUSTOMS_TYPE>{0}</CUSTOMS_TYPE>", "HG001");//海关类别（通联分配的海关类别代码HG001）
-            str.AppendFormat("<BIZ_TYPE_CODE>{0}</BIZ_TYPE_CODE>", "I20");//业务类型（直购进口：I10,网购保税进口：I20）
-            str.AppendFormat("<ESHOP_ENT_CODE>{0}</ESHOP_ENT_CODE>", eshopEntCode);//电商企业代码（10位海关代码）
-            str.AppendFormat("<ESHOP_ENT_NAME>{0}</ESHOP_ENT_NAME>", eshopEntName);//电商企业名称（企业备案的企业全称）
-            str.AppendFormat("<GOODS_FEE>{0}</GOODS_FEE>", goodsPrice);//商品货款金额（单位：分）
-            str.AppendFormat("<TAX_FEE>{0}</TAX_FEE>", taxPrice);//税款金额（单位：分）
-            str.Append("</GW_CUSTOMS>");
-            string customsExt = str.ToString();
-            this._value["ext2"] = SecurityUtil.MD5Encode(customsExt);
-            this._value["customsExt"] = customsExt;
-        }
-
         /// <summary>
         /// 设置某个键的值
         /// </summary>
@@ -300,6 +287,14 @@ namespace CQSS.Pay.BLL.Allinpay.Api
             }
         }
 
+        /// <summary>
+        /// 获取所有键值对
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, string> GetValues()
+        {
+            return this._value;
+        }
     }
 
     /// <summary>

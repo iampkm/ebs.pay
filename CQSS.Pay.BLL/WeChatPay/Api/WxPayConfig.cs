@@ -17,16 +17,16 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
         * KEY：商户支付密钥，参考开户邮件设置（必须配置）
         * APPSECRET：公众帐号secert（仅JSAPI支付的时候需要配置）
         */
-        public static string APPID = AppConfig.WeChatAppID;
-        public static string MCHID = AppConfig.WeChatMchID;
-        public static string KEY = AppConfig.WeChatPayKey;
-        public static string APPSECRET = AppConfig.WeChatAppSecret;
+        public static string APPID = AppConfig.Global.WeChatAppID;
+        public static string MCHID = AppConfig.Global.WeChatMchID;
+        public static string KEY = AppConfig.Global.WeChatPayKey;
+        public static string APPSECRET = AppConfig.Global.WeChatAppSecret;
 
         //=======【证书路径设置】===================================== 
         /* 证书路径,注意应该填写绝对路径（仅退款、撤销订单时需要）
         */
-        public static string SSLCERT_PATH = AppConfig.WeChatPaySSLCertPath;
-        public static string SSLCERT_PASSWORD = AppConfig.WeChatPaySSLCertPassword;
+        public static string SSLCERT_PATH = AppConfig.Global.WeChatPaySSLCertPath;
+        public static string SSLCERT_PASSWORD = AppConfig.Global.WeChatPaySSLCertPassword;
 
 
 

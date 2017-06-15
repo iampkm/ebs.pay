@@ -9,6 +9,7 @@ using System.Text;
 using System.Net;
 using System.Web.Security;
 using CQSS.Pay.Util.Helper;
+using CQSS.Pay.Util;
 
 namespace CQSS.Pay.BLL.WeChatPay.Api
 {
@@ -133,7 +134,7 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
             catch (Exception ex)
             {
                 WxPayLog.Error(this.GetType().ToString(), ex.ToString());
-                throw new WxPayException(ex.ToString());
+                throw;
             }
         }
 
@@ -146,7 +147,7 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
         {
             //统一下单
             WxPayData data = new WxPayData();
-            data.SetValue("body", "世纪购订单:" + out_trade_no);
+            data.SetValue("body", string.Format("{0}订单:{1}", AppConfig.Global.WebSiteName, out_trade_no));
             data.SetValue("attach", out_trade_no);
             data.SetValue("out_trade_no", out_trade_no);
             data.SetValue("total_fee", total_fee);
@@ -249,7 +250,7 @@ namespace CQSS.Pay.BLL.WeChatPay.Api
             catch (Exception ex)
             {
                 WxPayLog.Error(this.GetType().ToString(), ex.ToString());
-                throw new WxPayException(ex.ToString());
+                throw;
             }
 
             return parameter;
