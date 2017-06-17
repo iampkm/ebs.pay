@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -824,14 +825,15 @@ namespace CQSS.Pay.Util.Helper
         }
 
         /// <summary>
-        /// 打开数据库连接
+        /// 打开数据库连接(mysql 版本）
         /// </summary>
         /// <param name="connectionName">数据库连接</param>
         /// <returns></returns>
         public static IDbConnection OpenConnection(string connectionName = null)
         {
             string connectionString = GetConnectionString(connectionName);
-            IDbConnection connection = new SqlConnection(connectionString);
+            //IDbConnection connection = new SqlConnection(connectionString);
+            IDbConnection connection = new MySqlConnection(connectionString);
             if (connection.State != ConnectionState.Open)
                 connection.Open();
 
