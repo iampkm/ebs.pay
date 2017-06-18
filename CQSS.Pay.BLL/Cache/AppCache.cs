@@ -18,7 +18,7 @@ namespace CQSS.Pay.BLL.Cache
         public static string GetAppSecret(string appId)
         {
             var appSecret = CacheHelper.Get("appId_" + appId) as string;
-            if (appSecret == null)
+            if (string.IsNullOrEmpty(appSecret))
                 appSecret = SetAppSecret(appId);
 
             return appSecret;
@@ -32,8 +32,8 @@ namespace CQSS.Pay.BLL.Cache
         public static string SetAppSecret(string appId)
         {
             string appSecret = PayAppDAL.GetAppSecret(appId);
-            string value = appSecret == null ? "" : appSecret;
-            CacheHelper.Insert("appId_" + appId, value, appSecret == null ? TimeSpan.FromMinutes(10) : TimeSpan.FromDays(1));
+            string value = string.IsNullOrEmpty(appSecret) ? "" : appSecret;
+            CacheHelper.Insert("appId_" + appId, value, string.IsNullOrEmpty(appSecret) ? TimeSpan.FromMinutes(10) : TimeSpan.FromDays(1));
             return value;
         }
     }

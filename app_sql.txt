@@ -1,3 +1,4 @@
 select * from pay_app 
 
-insert into pay_app values ('GGX','CC73A89B-E4A4-4E84-9434-4619FE2B523A','π»π»œ„',1,'2017-06-17')
+insert into pay_app (AppId,AppSecret,AppName,Status,CreateTime) 
+values ('GGX','CC73A89B-E4A4-4E84-9434-4619FE2B523A','π»π»œ„',1,'2017-06-17')
